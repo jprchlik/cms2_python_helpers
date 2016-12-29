@@ -123,6 +123,7 @@ class download_cms_files:
 #Move file to a file name with start time included
         for k in qr:
             stime = k['time']['start']
+            stime = stime[:8]+'_'+stime[8:]
             sfile = k['fileid'].split('/')[-1].lower().replace('.','_').replace('_fits','.fits')
 
             shutil.move(self.cmsdir+self.basedir+sfile,self.cmsdir+self.basedir+stime+'_'+sfile)
