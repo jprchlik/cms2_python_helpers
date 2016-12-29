@@ -88,7 +88,7 @@ class download_cms_files:
         #grab particular (UV) wavelengths
         wave = vso.attrs.Wave(100*u.AA,3000*u.AA)
         qr = client.query(time,ins,wave)
-        res = client.get(qr,path=self.cmsdir+self.basedir+'{file}.fits')
+        res = client.get(qr,path=self.cmsdir+self.basedir+'{file}')
 
 
 
@@ -116,7 +116,7 @@ class download_cms_files:
         qr = client.query(time,ins,prov)
        
 
-        res = client.get(qr,path=self.cmsdir+self.basedir+'{file}.fits')
+        res = client.get(qr,path=self.cmsdir+self.basedir+'{file}')
 
 #get hmi magnetogram
     def get_hmi(self):
