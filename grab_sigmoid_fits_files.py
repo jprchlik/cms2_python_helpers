@@ -110,13 +110,16 @@ class download_cms_files:
         time = vso.attrs.Time(start,end)
         #set instrument
         ins = vso.attrs.Instrument('mdi')
+        #set provider which reduces to just 96m magnetograms
+        prov = vso.attrs.Provider('SDAC')
         #query vso
-        qr = client.query(time,ins)
-        print qr
+        qr = client.query(time,ins,prov)
+       
+
         res = client.get(qr,path=self.cmsdir+self.basedir+'{file}.fits')
 
 #get hmi magnetogram
-    def get_mdi(self):
+    def get_hmi(self):
         client = vso.VSOClient()
         dt = timedelta(seconds=96)
         start = datetime.strftime(self.dttime-dt,self.sform)
