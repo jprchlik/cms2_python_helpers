@@ -5,6 +5,7 @@ from datetime import datetime,timedelta
 import ftplib
 import sys,os
 import gzip
+import shutil
 
 
 class download_cms_files:
@@ -114,9 +115,17 @@ class download_cms_files:
         prov = vso.attrs.Provider('SDAC')
         #query vso
         qr = client.query(time,ins,prov)
+        self.qr = qr
        
 
-        res = client.get(qr,path=self.cmsdir+self.basedir+'{file}')
+        res = client.get(qr,path=self.cmsdir+self.basedir+'{file}').wait()
+
+#Move file to a file name with start time included
+        for k in qr:
+            stime = k['time']['start']
+            sfile = k['fileid'].split('/')[-1].lower().replace('.','_').replace('_fits','.fits')
+
+            shutil.move(self.cmsdir+self.basedir+sfile,self.cmsdir+self.basedir+stime+'_'+sfile)
 
 #get hmi magnetogram
     def get_hmi(self):
