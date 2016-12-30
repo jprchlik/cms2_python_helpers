@@ -152,5 +152,14 @@ class download_cms_files:
         self.get_carrington()
         self.get_magnetogram()
 
+#create subdirectory tree
+    def build_subtree(self):
+
+
+        try:
+            os.makedirs(self.cmsdir+self.basedir)
+        except:
+            print 'Directory {0} already exists. Proceeding'.format(self.cmsdir+self.basedir)
+        
 
 
