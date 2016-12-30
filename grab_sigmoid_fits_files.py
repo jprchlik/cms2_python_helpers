@@ -134,17 +134,19 @@ class download_cms_files:
 #get hmi magnetogram
     def get_hmi(self):
         client = vso.VSOClient()
-        dt = timedelta(seconds=96)
+        dt = timedelta(minutes=1)
         start = datetime.strftime(self.dttime-dt,self.sform)
         end = datetime.strftime(self.dttime+dt,self.sform)
+        phys = vso.attrs.Physobs('LOS_magnetic_field')
+        
     
         #set time span
         time = vso.attrs.Time(start,end)
         #set instrument
         ins = vso.attrs.Instrument('hmi')
         #query vso
-        qr = client.query(time,ins)
-        res = client.get(qr,path=self.cmsdir+self.basedir+'{file}.fits')
+        qr = client.query(time,ins,phys)
+        res = client.get(qr,path=self.cmsdir+self.basedir+'{file}',methods=("URL-FILE_Rice","URL-FILE")).wait()
 
 #download all
     def download_all(self):
