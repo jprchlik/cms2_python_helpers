@@ -1,122 +1,155 @@
 import os,shutil
+from datetime import datetime,timedelta
 
-##########################template = 'model1_setup'
-##########################for i in range(5,49):
-##########################    shutil.copy(template,template.replace('1',str(i)))
-##########################
-##########################
-##########################
-##########################pathtxt = "       1       0     102\n"
-##########################pathtxt = pathtxt+"      21       5       5        {0}\n"
-##########################pathtxt = pathtxt+"      152.500      150.500      145.500      140.500      134.500      129.500\n"
-##########################pathtxt = pathtxt+"      127.500      127.500      129.500      132.500      134.500      134.500\n"
-##########################pathtxt = pathtxt+"      133.500      129.500      128.500      123.500      117.500      114.500\n"
-##########################pathtxt = pathtxt+"      107.500      99.5000      93.5000\n"
-##########################pathtxt = pathtxt+"     -54.5000     -46.5000     -43.5000     -40.5000     -40.5000     -43.5000\n"
-##########################pathtxt = pathtxt+"     -45.5000     -49.5000     -53.5000     -55.5000     -59.5000     -61.5000\n"
-##########################pathtxt = pathtxt+"     -63.5000     -66.5000     -67.5000     -69.5000     -72.5000     -73.5000\n"
-##########################pathtxt = pathtxt+"     -73.5000     -72.5000     -73.5000\n"
-##########################pathtxt = pathtxt+"      4.00000 -1.54518e+20  {1}\n"
-##########################pathtxt = pathtxt+"      4.00000  1.23960e+19 -{1}\n"
-##########################pathtxt = pathtxt+"           0"
-##########################
-##########################
-##########################
-##########################pol = ['1.000E9','5.000E9','1.000E10','5.000E10','1.000E11']
-##########################axi = ['5.00000e19','7.00000e19','9.00000e19','1.00000e20','3.00000e20','5.00000e20','7.00000e20','9.00000e20','1.00000e21','1.50000e21']
-##########################
-##########################template = template.replace('setup','path')
-##########################
-##########################i = 1
-##########################for p in pol:
-##########################    for a in axi:
-##########################        run = True
-###########################remove early 7E20 models for some reason unknown to me
-##########################        if ((float(p) < 9e9) & (a == '7.00000e20')): run = False 
-##########################
-##########################        if run:
-##########################            files = open(template.replace('1',str(i)),'w')
-##########################            files.write(pathtxt.format(p,a))
-##########################            files.close()
-##########################
-##########################            i+=1
-##########################
+
+
+class create_cms2_files:
+
+    def __init__(self,time,cmsdir='../',nproc=4,outdir='%Y/%m/%d/%H%M/',tempmodel='model1'):
+        """Sets up inital variables to pass to rest of create_model_cms_files functions.
+           Really only need to set the input time string "YYYY/MM/DD HH:MM:SS" and possibly the full path to the CMS2 directory (assuming you downloaded git repo in cms2 directory).
+           Then assuming you set up the sigmoid directory to be YYYY/MM/DD/HHMM (can change with outdir variable if needed) you are set."""
+
+        if cmsdir[-1] != '/': cmsdir=cmsdir+'/'
+        self.time = time
+        self.nproc = nproc
+        self.sform = '%Y/%m/%d %H:%M:%S'
+        self.dttime = datetime.strptime(self.time,self.sform)
+        self.basedir = datetime.strftime(self.dttime,outdir)
+        self.cmsdir = cmsdir
+        self.tempmodel = tempmodel # template model
+
+
+
+
+#Potential model parameters 
+    def setup_file(self):
+        template = self.cmsdir+self.basedir+self.tempmodel+'_setup'
+        for i in range(2,49):
+            shutil.copy(template,self.cmsdir+self.basedir+self.tempmodel.replace('1',str(i))+'_setup')
+
+
+#copy path files after 1st one is complete
+    def path_file(self):
+#get number of lines in file
+        pathf = open(self.cmsdir+self.basedir+self.tempmodel+"_path",'r')
+        flines = len(pathf.readlines())
+
+#initalize text variable 
+        pathtxt = ""
+
+#path for fluxrope file
+        pathf = open(self.cmsdir+self.basedir+self.tempmodel+"_path",'r')
+
+#loop through file and create large text block
+        for j,i in enumerate(pathf):
+            #if j == 1: i = i[:-12]+'{0}'+'\n'
+            if ((j == flines-2) | (j == flines-3)):i = i[:-12]+'{1:6.5e}\n' 
+            if (j == 1): i = i[:-12]+'{0:6.5e}\n'
+            pathtxt = pathtxt+i
+        
+#model parameters
+        pol = ['1.00000E9','5.00000E9','1.00000E10','5.00000E10','1.00000E11']
+        axi = ['5.00000e19','7.00000e19','9.00000e19','1.00000e20','3.00000e20','5.00000e20','7.00000e20','9.00000e20','1.00000e21','1.50000e21']
+        
+        i = 1
+        for p in pol:
+            for a in axi:
+                run = True
+        #remove early 7E20 models for some reason unknown to me
+                if ((float(p) < 9e9) & (a == '7.00000e20')): run = False 
+        
+                if run:
+                    files = open(self.cmsdir+self.basedir+self.tempmodel.replace('1',str(i))+"_path",'w')
+                    files.write(pathtxt.format(float(p),float(a)))
+                    files.close()
+        
+                    i+=1
+
 #text format for input file
+    def model_input(self):
+        modin = self.basedir+"\n"
+        modin = modin+"11                  \n"
+        modin = modin+"model{0}              \n"
+        modin = modin+"0                   \n"
+        modin = modin+"100                 \n"
+        modin = modin+"0                   \n"
+        modin = modin+"0                   \n"
+        modin = modin+"0                   \n"
+        modin = modin+"model{0}              \n"
+        modin = modin+"100                 \n"
+        modin = modin+"900                 \n"
+        modin = modin+"0                   \n"
+        modin = modin+"0                   \n"
+        modin = modin+"0.003               \n"
+        modin = modin+"model{0}              \n"
+        modin = modin+"1000                \n"
+        modin = modin+"9000                \n"
+        modin = modin+"0                   \n"
+        modin = modin+"0                   \n"
+        modin = modin+"0.001               \n"
+        modin = modin+"model{0}              \n"
+        modin = modin+"10000               \n"
+        modin = modin+"10000               \n"
+        modin = modin+"0                   \n"
+        modin = modin+"0                   \n"
+        modin = modin+"0.0003              \n"
+        modin = modin+"model{0}              \n"
+        modin = modin+"20000               \n"
+        modin = modin+"10000               \n"
+        modin = modin+"0                   \n"
+        modin = modin+"0                   \n"
+        modin = modin+"0.0001              \n"
+        modin = modin+"model{0}              \n"
+        modin = modin+"30000               \n"
+        modin = modin+"10000               \n"
+        modin = modin+"0                   \n"
+        modin = modin+"0                   \n"
+        modin = modin+"0.0001              \n"
+        modin = modin+"model{0}              \n"
+        modin = modin+"40000               \n"
+        modin = modin+"10000               \n"
+        modin = modin+"0                   \n"
+        modin = modin+"0                   \n"
+        modin = modin+"0.0001              \n"
+        modin = modin+"model{0}              \n"
+        modin = modin+"50000               \n"
+        modin = modin+"10000               \n"
+        modin = modin+"0                   \n"
+        modin = modin+"0                   \n"
+        modin = modin+"0.0001              \n"
+        modin = modin+"model{0}              \n"
+        modin = modin+"60000               \n"
+        modin = modin+"10000               \n"
+        modin = modin+"0                   \n"
+        modin = modin+"0                   \n"
+        modin = modin+"0.0001              \n"
+        modin = modin+"model{0}              \n"
+        modin = modin+"70000               \n"
+        modin = modin+"10000               \n"
+        modin = modin+"0                   \n"
+        modin = modin+"0                   \n"
+        modin = modin+"0.0001              \n"
+        modin = modin+"model{0}              \n"
+        modin = modin+"80000               \n"
+        modin = modin+"10000               \n"
+        modin = modin+"0                   \n"
+        modin = modin+"0                   \n"
+        modin = modin+"0.0001              \n"
+        
+# what to write out the file as
+        filetime = datetime.strftime(self.dttime,'input%y%m%d%H%M%S_mod')
+        #create input files
+        for i in range(1,48):
+            files = open(self.cmsdir+self.basedir+filetime+"{0}.dat".format(str(i)),'w')
+            files.write(modin.format(str(i)))
+        
+        
+            files.close()
 
-modin = "2009/02/17/1144_scr/\n"
-modin = modin+"11                  \n"
-modin = modin+"model{0}              \n"
-modin = modin+"0                   \n"
-modin = modin+"100                 \n"
-modin = modin+"0                   \n"
-modin = modin+"0                   \n"
-modin = modin+"0                   \n"
-modin = modin+"model{0}              \n"
-modin = modin+"100                 \n"
-modin = modin+"900                 \n"
-modin = modin+"0                   \n"
-modin = modin+"0                   \n"
-modin = modin+"0.003               \n"
-modin = modin+"model{0}              \n"
-modin = modin+"1000                \n"
-modin = modin+"9000                \n"
-modin = modin+"0                   \n"
-modin = modin+"0                   \n"
-modin = modin+"0.001               \n"
-modin = modin+"model{0}              \n"
-modin = modin+"10000               \n"
-modin = modin+"10000               \n"
-modin = modin+"0                   \n"
-modin = modin+"0                   \n"
-modin = modin+"0.0003              \n"
-modin = modin+"model{0}              \n"
-modin = modin+"20000               \n"
-modin = modin+"10000               \n"
-modin = modin+"0                   \n"
-modin = modin+"0                   \n"
-modin = modin+"0.0001              \n"
-modin = modin+"model{0}              \n"
-modin = modin+"30000               \n"
-modin = modin+"10000               \n"
-modin = modin+"0                   \n"
-modin = modin+"0                   \n"
-modin = modin+"0.0001              \n"
-modin = modin+"model{0}              \n"
-modin = modin+"40000               \n"
-modin = modin+"10000               \n"
-modin = modin+"0                   \n"
-modin = modin+"0                   \n"
-modin = modin+"0.0001              \n"
-modin = modin+"model{0}              \n"
-modin = modin+"50000               \n"
-modin = modin+"10000               \n"
-modin = modin+"0                   \n"
-modin = modin+"0                   \n"
-modin = modin+"0.0001              \n"
-modin = modin+"model{0}              \n"
-modin = modin+"60000               \n"
-modin = modin+"10000               \n"
-modin = modin+"0                   \n"
-modin = modin+"0                   \n"
-modin = modin+"0.0001              \n"
-modin = modin+"model{0}              \n"
-modin = modin+"70000               \n"
-modin = modin+"10000               \n"
-modin = modin+"0                   \n"
-modin = modin+"0                   \n"
-modin = modin+"0.0001              \n"
-modin = modin+"model{0}              \n"
-modin = modin+"80000               \n"
-modin = modin+"10000               \n"
-modin = modin+"0                   \n"
-modin = modin+"0                   \n"
-modin = modin+"0.0001              \n"
-
-#create input files
-for i in range(1,49):
-    files = open("input090217114401_mod{0}.dat".format(str(i)),'w')
-    files.write(modin.format(str(i)))
-
-
-    files.close()
-    
+#run creation on all files
+    def create_all_files(self):
+        self.setup_file()
+        self.path_file()
+        self.model_input()
+            
