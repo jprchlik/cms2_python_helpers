@@ -7,7 +7,7 @@ class create_cms2_files:
 
     def __init__(self,time,cmsdir='../',nproc=4,outdir='%Y/%m/%d/%H%M/',tempmodel='model1'):
         """Sets up inital variables to pass to rest of create_model_cms_files functions.
-           Really only need to set the input time string "YYYY/MM/DD HH:MM:SS" and possibly the full path to the CMS2 directory (assuming you downloaded git repo in cms2 directory).
+           Really only need to set the input time string "YYYY/MM/DD HH:MM:SS" and possibly the path to the CMS2 directory (assuming you downloaded git repo in cms2 directory then cmsdir vairable already).
            Then assuming you set up the sigmoid directory to be YYYY/MM/DD/HHMM (can change with outdir variable if needed) you are set."""
 
         if cmsdir[-1] != '/': cmsdir=cmsdir+'/'
@@ -140,7 +140,7 @@ class create_cms2_files:
 # what to write out the file as
         filetime = datetime.strftime(self.dttime,'input%y%m%d%H%M%S_mod')
         #create input files
-        for i in range(1,48):
+        for i in range(1,49):
             files = open(self.cmsdir+self.basedir+filetime+"{0}.dat".format(str(i)),'w')
             files.write(modin.format(str(i)))
         
