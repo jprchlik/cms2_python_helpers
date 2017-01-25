@@ -18,7 +18,7 @@ def main(argv):
    
 #Descriptive information about each keyword
     argsdes=["A string time in the format of YYYY/MM/DD HH:MM:SS",
-             "The directory containing the CMS2",
+             "The directory containing the CMS2 (default = read 'cms2_dir' file)",
              "The directory format for the sigmoid (assumes a subdirectory of cmsdir (default = YYYY/MM/DD/HHMM/",
              "The initial model template already ran through CMS2. The model must end in 1 to work properly (default = model1)"]
 
@@ -35,6 +35,10 @@ def main(argv):
     sigd = '%Y/%m/%d/%H%M/'
 #default for the model template file (must end in a 1)
     temp = 'model1'
+#default for cms2 directory
+    cmsd = ''
+
+
 
 
     for opt, arg in opts:
