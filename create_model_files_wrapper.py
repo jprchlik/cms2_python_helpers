@@ -48,7 +48,7 @@ def main(argv):
         elif opt in ("-o","--outdir"):
             sigd = arg
         elif opt in ("-m","--modeltemp"):
-            sigd = arg
+            temp = arg
 
 
     mod = cmf.create_cms2_files(time,cmsdir=cmsd,outdir=sigd,tempmodel=temp)
