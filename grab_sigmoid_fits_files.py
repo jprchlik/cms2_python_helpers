@@ -11,10 +11,11 @@ import shutil
 class download_cms_files:
 
 # inital information about the directoies and time for sigmoid
-    def __init__(self,time='2009/02/17 11:44:00',nproc=4,cmsdir='/Volumes/Pegasus/jprchlik/projects/sigmoid_catalog/CMS2',outdir='%Y/%m/%d/%H%M/'):
+    def __init__(self,time='2009/02/17 11:44:00',nproc=4,cmsdir='',outdir='%Y/%m/%d/%H%M/'):
         """Sets up inital variables to pass to rest of download_cms_file functions.
            Really only need to set the input time string "YYYY/MM/DD HH:MM:SS" and full path to the CMS2 directory.
            Then assuming you set up the sigmoid directory to be YYYY/MM/DD/HHMM (can change with outdir variable if needed) you are set."""
+        if cmsdir == '': cmsdir = open('cms2_dir','r').readlines()[0][:-1]#read in first line of cms2_dir and format to send to script
         if cmsdir[-1] != '/': cmsdir=cmsdir+'/'
         self.time = time
         self.nproc = nproc
