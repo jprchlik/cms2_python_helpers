@@ -10,6 +10,30 @@ Where -t <--time> corresponds to the sigmoid observation time in "YYYY/MM/DD HH:
 -c <--cmsdir> corresponds to the top CMS2 directory (not need if you update cmd2_dir file),
 -o <--outdir> corresponds to the output directories format (default = YYYY/MM/DD/HHMM/, therefore not required),
 and -m <--modeltemp> corresponds to the first model you created in CMS2, which must end in a 1 (e.g. model1, which is assumed unless -m is set).
+You may avoid typing "python create_model_files_wrapper.py" by creating an alias for the utility in your ~/.cshrc file.
+For example you could use the alias cmfw, so I put the following line in my ~/.cshrc file.
+
+alias cmfw "/PATHTO/CMS2HELPERS/create_model_files_wrapper.py"
+
+Examples:
+
+python create_model_files_wrapper.py -t 2009/02/17/1144 
+
+or using the alias
+
+cmfw -t 2009/02/17/1144
+
+create_model_files_wrapper works by calling the class create_cms2_files in create_model_files.py.
+The first task which uses the create_cms2_files is modelXX_setup file for all 47 models 
+(1 addition model comes from the first run through making a total of 48 models).
+The setup files are the same for all models and primarily define the nearest high resolution and Carrington rotation magnetograms.
+Therefore, the code copies the initial setup file but changes the name to the corresponding model.
+Next, the code creates a set of "path" files for each model.
+The path file corresponds to previously traced flux rope,
+but the code changes the values for the axial and poloidal flux.
+CMS2 will ask for this when recomputing a new flux model.
+Finally, the code produces an "input" file.
+The input file is used by fff2.90 code to generate a series of relaxed force free models for each poloidal and axial flux.
 
 
 
