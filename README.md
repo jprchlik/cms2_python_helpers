@@ -2,6 +2,15 @@ A script set to assist in cutting down some of the monotony associated with runn
 The script and file list is as follows:
 
 #create_model_files.py and create_model_files_wrapper.py
+These scripts are only useful after you ran CMS2 in idl previous,
+thus creating as model1 and associated files.
+The create_model_files_wrapper.py command line utility calls create_model_files.py to do the heavy lifting.
+You man call the wrapper by typing "python create_model_files_wrapper.py -t <--time> -c <--cmsdir> -o <--outdir> -m <--modeltemp>".
+Where -t <--time> corresponds to the sigmoid observation time in "YYYY/MM/DD HH:MM:SS",
+-c <--cmsdir> corresponds to the top CMS2 directory (not need if you update cmd2_dir file),
+-o <--outdir> corresponds to the output directories format (default = YYYY/MM/DD/HHMM/, therefore not required),
+and -m <--modeltemp> corresponds to the first model you created in CMS2, which must end in a 1 (e.g. model1, which is assumed unless -m is set).
+
 
 
 #fff2_input_models.py and (wrapper coming soon)
@@ -19,6 +28,7 @@ For example I use the alias gsff, so I put the following line in my ~/.cshrc fil
 alias gsff "/PATHTO/CMS2HELPERS/grab_sigmoid_fits_files.py"
 
 Examples:
+
 python grab_sigmoid_download_wrapper.py -t 2009/02/17/1144 
 
 or using the alias
