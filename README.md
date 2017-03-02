@@ -20,7 +20,9 @@ alias gsff "/PATHTO/CMS2HELPERS/grab_sigmoid_fits_files.py"
 
 Examples:
 python grab_sigmoid_download_wrapper.py -t 2009/02/17/1144 
+
 or using the alias
+
 gsff -t 2009/02/17/1144
 
 
