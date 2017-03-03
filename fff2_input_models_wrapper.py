@@ -71,14 +71,6 @@ def main(argv):
         elif opt in ("-l","--maxmod"):
             maxmod = int(arg)
 
-    print time
-    print cmsd
-    print sigd
-    print fstart
-    print nproc
-    print modmin
-    print modmax
-
  
     inp = fim.fff2_input_models(time,cmsdir=cmsd,mdir=sigd,fstart=fstart,nproc=nproc,modmin=modmin,modmax=modmax)
     if nproc == 1:
