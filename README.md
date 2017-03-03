@@ -38,6 +38,8 @@ The input file is used by fff2.90 code to generate a series of relaxed force fre
 
 
 #fff2_input_models.py and (wrapper coming soon)
+fff2_input_models relaxes the different axial and poloidal models created in CMS2.
+The code preforms the task in parallel using multiprocessing Pool and creating new c-shell.
 
 #grab_sigmoid_fits_files.py and grab_sigmoid_download_wrapper.py
 These two scripts in combination produce the observational file necessary to run CMS2.
