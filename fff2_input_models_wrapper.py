@@ -20,10 +20,9 @@ def main(argv):
     argsdes=["A string time in the format of YYYY/MM/DD HH:MM:SS",
              "The directory containing the CMS2 (default = read 'cms2_dir' file)",
              "The directory format for the sigmoid (assumes a subdirectory of cmsdir (default = YYYY/MM/DD/HHMM/",
-             "The initial model template already ran through CMS2. The model must end in 1 to work properly (default = model1)"
-             "The input file format (default = inputYYYYMMDDHHMMSS_mod)"
-             "The number of processors to run on (default = 6)"
-             "The first model input number to look for (default = 1)"
+             "The input file format (default = inputYYYYMMDDHHMMSS_mod)",
+             "The number of processors to run on (default = 6)",
+             "The first model input number to look for (default = 1)",
              "The last model input number to look for (default = 48)"
             ]
 
@@ -66,18 +65,27 @@ def main(argv):
         elif opt in ("-i","--ifile"):
             fstart = arg
         elif opt in ("-n","--nproc"):
-            fstart = int(arg)
+            nproc = int(arg)
         elif opt in ("-s","--minmod"):
             minmod = int(arg)
         elif opt in ("-l","--maxmod"):
             maxmod = int(arg)
 
-    inp = fim.fff2_input_models(time,cmsdir=cmsd,outdir=sigd,fstart=fstart,nproc=nproc,modmin=modmin,modmax=modmax)
+    print time
+    print cmsd
+    print sigd
+    print fstart
+    print nproc
+    print modmin
+    print modmax
+
+ 
+    inp = fim.fff2_input_models(time,cmsdir=cmsd,mdir=sigd,fstart=fstart,nproc=nproc,modmin=modmin,modmax=modmax)
     if nproc == 1:
         inp.run_loop()
     elif nproc > 1:
         inp.run_par()
-    elif nproc < 0:
+    elif nproc < 1:
         print "Number of processors used must be greater than 0"
         sys.exit(2)
 
