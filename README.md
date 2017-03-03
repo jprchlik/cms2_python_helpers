@@ -5,7 +5,7 @@ An example run through follows:
 Download supporting observational files.
 >python grab_sigmoid_download_wrapper.py -t "2009/02/17 11:44:01" 
 
-RUN CMS2 on for model1 and trace a flux rope path.
+RUN CMS2 for model1 and trace a flux rope path.
 
 Create a set of flux ropes with different polodial and axial fluxes (also creates input files to run later,
 it copies most of the information from model1)
