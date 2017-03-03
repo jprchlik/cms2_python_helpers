@@ -7,7 +7,7 @@ thus creating as model1 and associated files.
 The create_model_files_wrapper.py command line utility calls create_model_files.py to do the heavy lifting.
 You man call the wrapper by typing "python create_model_files_wrapper.py -t <--time> -c <--cmsdir> -o <--outdir> -m <--modeltemp>".
 Where -t <--time> corresponds to the sigmoid observation time in "YYYY/MM/DD HH:MM:SS",
--c <--cmsdir> corresponds to the top CMS2 directory (not need if you update cmd2_dir file),
+-c <--cmsdir> corresponds to the top CMS2 directory (not need if you update cms2_dir file),
 -o <--outdir> corresponds to the output directories format (default = YYYY/MM/DD/HHMM/, therefore not required),
 and -m <--modeltemp> corresponds to the first model you created in CMS2, which must end in a 1 (e.g. model1, which is assumed unless -m is set).
 You may avoid typing "python create_model_files_wrapper.py" by creating an alias for the utility in your ~/.cshrc file.
@@ -17,11 +17,11 @@ alias cmfw "/PATHTO/CMS2HELPERS/create_model_files_wrapper.py"
 
 Examples:
 
-python create_model_files_wrapper.py -t 2009/02/17/1144 
+python create_model_files_wrapper.py -t "2009/02/17 11:44:01"
 
 or using the alias
 
-cmfw -t 2009/02/17/1144
+cmfw -t "2009/02/17 11:44:01"
 
 create_model_files_wrapper works by calling the class create_cms2_files in create_model_files.py.
 The first task which uses the create_cms2_files is modelXX_setup file for all 47 models 
@@ -37,9 +37,34 @@ The input file is used by fff2.90 code to generate a series of relaxed force fre
 
 
 
-#fff2_input_models.py and (wrapper coming soon)
+#fff2_input_models.py and fff2_input_models_wrapper.py
 fff2_input_models relaxes the different axial and poloidal models created in CMS2.
-The code preforms the task in parallel using multiprocessing Pool and creating new c-shell.
+Therefore, it is only useful after you ran models through CMS2.
+The code preforms the task in parallel using multiprocessing Pool and creating new c-shell or just loops through the models if the users prefers that.
+All user specification are callable through the wrapper for this program fff2_input_models_wrapper.py.
+Running the wrapper requires you run "python fff2_input_models_wrapper.py -t <--time> -c <--cmsdir> -o <--outdir> -i <--ifile> -n <--nproc> -s <--minmod> -l <--maxmod>"
+. Where -t <--time> corresponds to the sigmoid observation time in "YYYY/MM/DD HH:MM:SS",
+-c <--cmsdir> corresponds to the top CMS2 directory (not need if you update the cms2_dir file), 
+-o <--outdir> corresponds to the directory where the input files were output (default = YYYY/MM/DD/HHMM/, therefore not required),
+-i <--ifile> corresponds to the start of the input files format which to pass to fff2 (default = inputYYYYMMDDHHMMSS_mod, therefore not required),
+-n <--nproc> corresponds to the number of processors to run the fff2 FORTRAN program (default = 6),
+-s <--minmod> corresponds to the first model you would like to relax with fff2 (default = 1),
+and
+-l <--maxmod> corresponds to the last model you would like fff2 to relax (default = 48). 
+You may avoid typing "python fff2_input_models_wrapper.py" by creating an alias for the utility in your ~/.cshrc file.
+For example you could use the alias cmfw, so I put the following line in my ~/.cshrc file.
+
+
+alias fimw "/PATHTO/CMS2HELPERS/fff2_input_models_wrapper.py"
+
+Examples:
+
+python fff2_input_models_wrapper.py -t "2009/02/17 11:44:01"
+
+or using the alias
+
+fimw -t "2009/02/17 11:44:01"
+
 
 #grab_sigmoid_fits_files.py and grab_sigmoid_download_wrapper.py
 These two scripts in combination produce the observational file necessary to run CMS2.
@@ -55,11 +80,11 @@ alias gsff "/PATHTO/CMS2HELPERS/grab_sigmoid_fits_files.py"
 
 Examples:
 
-python grab_sigmoid_download_wrapper.py -t 2009/02/17/1144 
+python grab_sigmoid_download_wrapper.py -t "2009/02/17 11:44:01" 
 
 or using the alias
 
-gsff -t 2009/02/17/1144
+gsff -t "2009/02/17 11:44:01"
 
 
 
