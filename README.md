@@ -1,5 +1,25 @@
 A script set to assist in cutting down some of the monotony associated with running CMS2 and relaxing the force free model.
-The script and file list is as follows:
+These scripts support CMS2 so they cannot be ran one immediately after another, but are only broken by required user interaction in CMS2.
+An example run through follows:
+
+Download supporting observational files.
+>python grab_sigmoid_download_wrapper.py -t "2009/02/17 11:44:01" 
+
+RUN CMS2 on for model1 and trace a flux rope path.
+
+Create a set of flux ropes with different polodial and axial fluxes (also creates input files to run later,
+it copies most of the information from model1)
+>python create_model_files_wrapper.py -t "2009/02/17 11:44:01"
+
+Run CMS2 on the remaining 47 models by loading the previously created model and flux rope path files 
+
+Relax all models created defined in CMS2 using input files created in the previous python script
+>python fff2_input_models_wrapper.py -t "2009/02/17 11:44:01"
+
+NOW wait a long time for all CMS
+
+The script and file list explanations are as follows:
+
 
 #create_model_files.py and create_model_files_wrapper.py
 These scripts are only useful after you ran CMS2 in idl previous,
