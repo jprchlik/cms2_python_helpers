@@ -36,7 +36,7 @@ class fff2_input_models:
 #change working directory to cms2 directory 
         if cmsdir == '': cmsdir = open('cms2_dir','r').readlines()[0][:-1]#read in first line of cms2_dir and format to send to script
         if cmsdir[-1] != '/': cmsdir=cmsdir+'/'
-        os.chdir(cmdir)
+        os.chdir(cmsdir)
     
 
     def run_loop(self):
