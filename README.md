@@ -16,7 +16,7 @@ Run CMS2 on the remaining 47 models by loading the previously created model and 
 Relax all models created defined in CMS2 using input files created in the previous python script
 >python fff2_input_models_wrapper.py -t "2009/02/17 11:44:01"
 
-NOW wait a long time for all CMS
+NOW wait a long time for all CMS2 models to relax (may take a month).
 
 The script and file list explanations are as follows:
 
