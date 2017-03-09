@@ -67,9 +67,9 @@ def main(argv):
         elif opt in ("-n","--nproc"):
             nproc = int(arg)
         elif opt in ("-s","--minmod"):
-            minmod = int(arg)
+            modmin = int(arg)
         elif opt in ("-l","--maxmod"):
-            maxmod = int(arg)
+            modmax = int(arg)
 
  
     inp = fim.fff2_input_models(time,cmsdir=cmsd,mdir=sigd,fstart=fstart,nproc=nproc,modmin=modmin,modmax=modmax)
