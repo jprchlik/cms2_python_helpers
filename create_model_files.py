@@ -26,7 +26,7 @@ class create_cms2_files:
 #Potential model parameters 
     def setup_file(self):
         template = self.cmsdir+self.basedir+self.tempmodel+'_setup'
-        for i in range(2,49):
+        for i in range(2,self.nparam):
             shutil.copy(template,self.cmsdir+self.basedir+self.tempmodel.replace('1',str(i))+'_setup')
 
 
@@ -51,7 +51,9 @@ class create_cms2_files:
         
 #model parameters
         pol = ['1.00000E9','5.00000E9','1.00000E10','5.00000E10','1.00000E11']
-        axi = ['5.00000e19','7.00000e19','9.00000e19','1.00000e20','3.00000e20','5.00000e20','7.00000e20','9.00000e20','1.00000e21','1.50000e21']
+#Updated per conversation with antonia 2017/04/03
+#       axi = ['5.00000e19','7.00000e19','9.00000e19','1.00000e20','3.00000e20','5.00000e20','7.00000e20','9.00000e20','1.00000e21','1.50000e21']
+       axi = ['1.00000e19','3.00000e19','5.00000e19','7.00000e19','9.00000e19','1.00000e20','3.00000e20','5.00000e20','7.00000e20','9.00000e20','1.00000e21','1.50000e21']
         
         i = 1
         for p in pol:
@@ -66,6 +68,7 @@ class create_cms2_files:
                     files.close()
         
                     i+=1
+        self.nparam = i #get number of models to create 
 
 #text format for input file
     def model_input(self):
@@ -141,7 +144,7 @@ class create_cms2_files:
 # what to write out the file as
         filetime = datetime.strftime(self.dttime,'input%y%m%d%H%M%S_mod')
         #create input files
-        for i in range(1,49):
+        for i in range(1,self.nparam):
             files = open(self.cmsdir+self.basedir+filetime+"{0}.dat".format(str(i)),'w')
             files.write(modin.format(str(i)))
         
@@ -150,7 +153,7 @@ class create_cms2_files:
 
 #run creation on all files
     def create_all_files(self):
-        self.setup_file()
         self.path_file()
+        self.setup_file()
         self.model_input()
             
