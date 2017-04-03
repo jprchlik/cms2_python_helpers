@@ -24,6 +24,7 @@ class download_cms_files:
         self.basedir = datetime.strftime(self.dttime,outdir)
         self.cmsdir = cmsdir
 
+        self.sdo_start =  datetime(2010,05,01,00,00,00)
 
 #find carrington rotation number and as politely for the files
     def get_carrington(self):
@@ -76,7 +77,21 @@ class download_cms_files:
                 for line in infile:
                     outfile.write(line)
 
+    def get_aia(self):
+        #Get Stereo observations
+        client = vso.VSOClient()
+        dt = timedelta(minutes=1)
+        start = datetime.strftime(self.dttime-dt,self.sform)
+        end = datetime.strftime(self.dttime+dt,self.sform)
     
+        #set time span
+        time = vso.attrs.Time(start,end)
+        #grabs both stereo a and b
+        ins = vso.attrs.Instrument('aia')
+        #grab particular (UV) wavelengths
+        wave = vso.attrs.Wave(100*u.AA,3000*u.AA)
+        qr = client.query(time,ins,wave)
+        res = client.get(qr,path=self.cmsdir+self.basedir+'{file}')
 
 
     def get_stereo(self):
@@ -96,10 +111,18 @@ class download_cms_files:
         res = client.get(qr,path=self.cmsdir+self.basedir+'{file}')
 
 
+#Download EUV images
+    def get_euv(self):
+        if self.dttime >= self.sdo_start:
+            self.get_aia()
+        else:
+            self.get_stereo()
+
+
 
 #dowload magnetograms
     def get_magnetogram(self):
-        if self.dttime >= datetime(2010,05,01,00,00,00):
+        if self.dttime >= self.sdo_start:
             self.get_hmi()
         else:
             self.get_mdi()
@@ -151,7 +174,7 @@ class download_cms_files:
 
 #download all
     def download_all(self):
-        self.get_stereo()
+        self.get_euv()
         self.get_carrington()
         self.get_magnetogram()
 
