@@ -1,6 +1,9 @@
 from sunpy.net import vso
+from numpy import unique
+import glob
 from sunpy.sun import carrington_rotation_number
 import astropy.units as u
+from astropy.io import fits
 from datetime import datetime,timedelta
 import ftplib
 import sys,os
@@ -32,22 +35,93 @@ class download_cms_files:
     def get_hinode(self):
 #Hinode archive
         self.hinode_date = '%Y/%m/%d/'
-        self.hinode_arch = '/archive/hinode/xrt/level0/'+datetime.strptime(self.time,self.hinode_date)
+        self.hinode_arch = '/archive/hinode/xrt/level1/'+datetime.strftime(self.dttime,self.hinode_date)
+#look for timeline to get synoptic timelines
+        self.find_synoptic_times()
 
 
 #find times for synoptics
     def find_synoptic_times(self):
-        self.hinode_tfmt = self.hinode_dat+'%Y%m%d_exported/'#location of hinode timelines
-        lookt = True # found the proper timeline
+        self.hinode_tfmt = self.hinode_date+'%Y%m%d_exported/'#location of hinode timelines
         m = 0 # counter for number of days looking back
-        while lookt:
-            self.hinode_time = self.time-timedelta(days=m)
-            self.hinode_tldr = '/archive/hinode/timelines/level0/'+datetime.strptime(self.hionde_time,self.hinode_tfmt)
-            foundt = os.path.exists(self.hinode_tfmt)
-            m += 1 #increment by 1 day
-            if m >= 14: return #exit downloading hinode data if no timeline found for 14 days
-            if foundt:  lookt = False #if find hinode directory exit loop
+        for p in range(2):#dirty way to prevent timeline start day from only returning one set of synoptics
+            lookt = True # found the proper timeline
+            while lookt:
+                self.hinode_time = self.dttime-timedelta(days=m)
+                self.hinode_tldr = '/archive/hinode/xrt/timelines/'+datetime.strftime(self.hinode_time,self.hinode_tfmt)
+                foundt = os.path.exists(self.hinode_tldr)
+                m += 1 #increment by 1 day
+                if m >= 14: return #exit downloading hinode data if no timeline found for 14 days
+                if foundt:  lookt = False #if find hinode directory exit loop
+
+            self.copy_synoptics()
+
+#copy xrt synoptics to local directory
+    def copy_synoptics(self):
+        self.read_xrt_timeline()
+        self.xrt_file_list()
+        for i in self.xrt_files: shutil.copy(i,self.cmsdir+self.basedir)
+
+#get list of files in timerange
+    def xrt_file_list(self):
         
+#get formatted list of hours
+        self.xrt_hours = []
+        for i in self.xrt_beg: self.xrt_hours.append('H{0:%H}00'.format(i)) 
+        for i in self.xrt_end: self.xrt_hours.append('H{0:%H}00'.format(i)) 
+
+#get unique hours
+        self.xrt_hours = unique(self.xrt_hours)
+        
+#get all files in hours and their associated times
+        self.xrt_files = []
+
+#loop over unique hours
+        for i in self.xrt_hours:
+            tempfiles = glob.glob('{0}/{1}/*fits'.format(self.hinode_arch,i))
+            for j in tempfiles:
+                temptime = datetime.strptime(j.split('/')[-1].split('.')[0],'L1_XRT%Y%m%d_%H%M%S')
+#check if time is in range
+                for k in range(len(self.xrt_beg)):
+                   if ((temptime >= self.xrt_beg[k]) & (temptime <= self.xrt_end[k])):
+#check if header information is compatible with a syntopic
+                       dat = fits.open(j)
+                       hdr = dat[0].header
+#check header information on fits files to get just synoptics
+                       if ((hdr['NAXIS1'] == 1024) & (hdr['NAXIS2'] == 1024) & ((hdr['EC_FW2_'] == 'Ti_poly') | (hdr['EC_FW1_'] == 'Al_poly') | (hdr['EC_FW2_'] == 'Al_mesh') | (hdr['EC_FW1_'] == 'Be_thin') | (hdr['EC_FW2_'] != 'Gband'))):
+                           self.xrt_files.append(j)
+
+     
+        
+   
+#read timeline and return synoptic times
+    def read_xrt_timeline(self):        
+        fmtrept = self.hinode_tldr+'re-point_{0:%Y%m%d}*.txt'.format(self.hinode_time)
+        repfile = glob.glob(fmtrept)
+        repoint = open(repfile[-1],'r') # read the repoint file
+#list of beginning and end time for synoptics
+        self.xrt_beg = []
+        self.xrt_end = []
+        ender = False #gets the end time for synoptic
+        timefmt = '%Y/%m/%d %H:%M:%S' #format of time in pointing file
+
+#do not start with an end
+        end = False
+#get the begging and end times of xrt syntopics
+        for i in repoint:
+            if end:
+                end = False
+                try:
+                    self.xrt_end.append(datetime.strptime(i[20:39],timefmt))
+                except:
+                    self.xrt_end.append(self.xrt_beg[-1]+timedelta(minutes=20)) #if syntopic is last pointing just add 20 minutes
+               
+            if 'synoptic' in i.lower():
+                end = True
+                self.xrt_beg.append(datetime.strptime(i[20:39],timefmt))
+                print i
+ 
+
 
 #find carrington rotation number and as politely for the files
     def get_carrington(self):
@@ -197,6 +271,7 @@ class download_cms_files:
 
 #download all
     def download_all(self):
+        self.get_hinode()
         self.get_euv()
         self.get_carrington()
         self.get_magnetogram()
