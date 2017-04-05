@@ -24,7 +24,30 @@ class download_cms_files:
         self.basedir = datetime.strftime(self.dttime,outdir)
         self.cmsdir = cmsdir
 
+#start date from using sdo data
         self.sdo_start =  datetime(2010,05,01,00,00,00)
+
+
+#copy hinode synoptic files
+    def get_hinode(self):
+#Hinode archive
+        self.hinode_date = '%Y/%m/%d/'
+        self.hinode_arch = '/archive/hinode/xrt/level0/'+datetime.strptime(self.time,self.hinode_date)
+
+
+#find times for synoptics
+    def find_synoptic_times(self):
+        self.hinode_tfmt = self.hinode_dat+'%Y%m%d_exported/'#location of hinode timelines
+        lookt = True # found the proper timeline
+        m = 0 # counter for number of days looking back
+        while lookt:
+            self.hinode_time = self.time-timedelta(days=m)
+            self.hinode_tldr = '/archive/hinode/timelines/level0/'+datetime.strptime(self.hionde_time,self.hinode_tfmt)
+            foundt = os.path.exists(self.hinode_tfmt)
+            m += 1 #increment by 1 day
+            if m >= 14: return #exit downloading hinode data if no timeline found for 14 days
+            if foundt:  lookt = False #if find hinode directory exit loop
+        
 
 #find carrington rotation number and as politely for the files
     def get_carrington(self):
