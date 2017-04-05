@@ -119,7 +119,6 @@ class download_cms_files:
             if 'synoptic' in i.lower():
                 end = True
                 self.xrt_beg.append(datetime.strptime(i[20:39],timefmt))
-                print i
  
 
 
