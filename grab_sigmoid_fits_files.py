@@ -185,9 +185,23 @@ class download_cms_files:
         #grabs both stereo a and b
         ins = vso.attrs.Instrument('aia')
         #grab particular (UV) wavelengths
-        wave = vso.attrs.Wave(100*u.AA,3000*u.AA)
-        qr = client.query(time,ins,wave)
-        res = client.get(qr,path=self.cmsdir+self.basedir+'{file}')
+        wave = vso.attrs.Wave(171*u.AA,171*u.AA)
+        qr1 = client.query(time,ins,wave)
+        res1 = client.get(qr1,path=self.cmsdir+self.basedir+'{file}').wait()
+        #grab particular (UV) wavelengths
+        wave = vso.attrs.Wave(193*u.AA,193*u.AA)
+        qr2 = client.query(time,ins,wave)
+        res2 = client.get(qr2,path=self.cmsdir+self.basedir+'{file}').wait()
+        #grab particular (UV) wavelengths
+        wave = vso.attrs.Wave(304*u.AA,304*u.AA)
+        qr3 = client.query(time,ins,wave)
+        res3 = client.get(qr3,path=self.cmsdir+self.basedir+'{file}').wait()
+        #grab particular (UV) wavelengths
+        wave = vso.attrs.Wave(211*u.AA,211*u.AA)
+        qr4 = client.query(time,ins,wave)
+        res4 = client.get(qr4,path=self.cmsdir+self.basedir+'{file}').wait()
+
+
 
 
     def get_stereo(self):
