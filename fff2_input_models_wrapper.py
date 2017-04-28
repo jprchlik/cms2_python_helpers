@@ -4,7 +4,7 @@ import fff2_input_models as fim
 
 def main(argv):
 
-    inargs1 = 'ht:c:o:i:n:s:l'
+    inargs1 = 'ht:c:o:i:n:s:l:'
     snargs1 = inargs1[1:].split(':')
 
     inargs2 = ['time','cmsdir','outdir','ifile',"nproc","minmod","maxmod"]
@@ -32,7 +32,7 @@ def main(argv):
 #load user values
     try:
         opts,args = getopt.getopt(argv,inargs1,inargs2)
-    except getop.GetoptError:
+    except getopt.GetoptError:
         print helpinfo
         sys.exit(2)
 
@@ -69,6 +69,7 @@ def main(argv):
         elif opt in ("-s","--minmod"):
             modmin = int(arg)
         elif opt in ("-l","--maxmod"):
+            print arg 
             modmax = int(arg)
 
  

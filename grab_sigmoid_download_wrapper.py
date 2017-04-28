@@ -5,7 +5,7 @@ import grab_sigmoid_fits_files as gsff
 
 def main(argv):
 
-    inargs1 = 'ht:c:o'
+    inargs1 = 'ht:c:o:'
     snargs1 = inargs1[1:].split(':')
 
     inargs2 = ['time','cmsdir','outdir']

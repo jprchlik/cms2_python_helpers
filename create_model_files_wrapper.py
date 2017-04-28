@@ -4,7 +4,7 @@ import create_model_files as cmf
 
 def main(argv):
 
-    inargs1 = 'ht:c:o:m'
+    inargs1 = 'ht:c:o:m:'
     snargs1 = inargs1[1:].split(':')
 
     inargs2 = ['time','cmsdir','outdir','modeltemp']
