@@ -8,6 +8,7 @@ from astropy.table import join
 import glob
 import os,shutil
 from datetime import datetime,timedelta
+import matplotlib.gridspec as gridspec
 import matplotlib.pyplot as plt
 import numpy as np
 
@@ -84,23 +85,33 @@ class cms2_plot:
         """Create plots using the best fit data"""
         self.read_infit()
 
-        self.figt,self.axt = plt.subplots(ncols=2)
-        self.figi,self.axi = plt.subplots()
+        self.figt,self.axt = plt.subplots(ncols=3,nrows=1,gridspec_kw={'width_ratios':[20,20,1]})
+#        self.grid = gridspec.GridSpec(1,3,width_ratios=[10,10,1],height_ratios=[1]) 
+        self.axt = [plt.subplot(i) for i in self.axt.ravel()]
+       
+       
         self.tdat['color'] = 'black'
         self.tdat['color'][self.tdat['eruption'] == 'Yes'] = 'red'
 
         use = self.tdat['bfit_a_5'] > 0 #reject filled values
         print self.tdat['bfit_a_5'][use].max(),self.tdat['bfit_a_5'][use].min()
-        print self.tdat['bfit_s_5'][use].max(),self.tdat['bfit_s_5'][use].min()
-        self.axt[0].scatter(self.tdat['axi'][use],self.tdat['pol'][use],c=self.tdat['bfit_a_5'][use],cmap=plt.cm.Greys,vmin= 0.00015,vmax=0.00200,edgecolor=self.tdat['color'][use])
-        self.axt[1].scatter(self.tdat['free_energy'][use],self.tdat['helicity'][use],c=self.tdat['bfit_a_5'][use],cmap=plt.cm.Greys,vmin= 0.00015,vmax=0.00200,edgecolor=self.tdat['color'][use])
+
+        vmin =  0.0015
+        vmax =  0.0025
+        cmap =  plt.cm.Greys
+        cmap =  plt.cm.Blues
+        cax =self.axt[0].scatter(self.tdat['axi'][use],self.tdat['pol'][use],c=self.tdat['bfit_a_5'][use],cmap=cmap,vmin=vmin,vmax=vmax,edgecolor=self.tdat['color'][use])
+        self.axt[1].scatter(self.tdat['free_energy'][use],self.tdat['helicity'][use],c=self.tdat['bfit_a_5'][use],cmap=cmap,vmin=vmin,vmax=vmax,edgecolor=self.tdat['color'][use])
+
+
+        cbar = self.figt.colorbar(cax,cax=self.axt[2])
  #       self.axt[1,1].scatter(self.tdat['free_energy'][use],self.tdat['helicity'][use],c=self.tdat['bfit_s_5'][use],cmap=plt.cm.magma,vmin= 0.00015,vmax=0.000600)
 
-        for i in self.axt.ravel(): fancy_plot(i)
+        for i in self.axt: fancy_plot(i)
 
 
 
         self.figt.savefig(self.cdir+self.bdir+'total_fit_{0:%Y%m%d%H%M%S}.png'.format(self.time),bbox_pad=.1,bbox_inches='tight')
         self.figt.savefig(self.cdir+self.bdir+'total_fit_{0:%Y%m%d%H%M%S}.eps'.format(self.time),bbox_pad=.1,bbox_inches='tight')
-        self.figi.savefig(self.cdir+self.bdir+'indvd_fit_{0:%Y%m%d%H%M%S}.png'.format(self.time),bbox_pad=.1,bbox_inches='tight')
-        self.figi.savefig(self.cdir+self.bdir+'indvd_fit_{0:%Y%m%d%H%M%S}.eps'.format(self.time),bbox_pad=.1,bbox_inches='tight')
+        #self.figi.savefig(self.cdir+self.bdir+'indvd_fit_{0:%Y%m%d%H%M%S}.png'.format(self.time),bbox_pad=.1,bbox_inches='tight')
+        #self.figi.savefig(self.cdir+self.bdir+'indvd_fit_{0:%Y%m%d%H%M%S}.eps'.format(self.time),bbox_pad=.1,bbox_inches='tight')
