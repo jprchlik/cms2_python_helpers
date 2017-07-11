@@ -1,6 +1,6 @@
 import matplotlib as mpl
 mpl.rcParams['text.usetex'] = True
-mpl.rcParams['font.size'] = 14.0
+mpl.rcParams['font.size'] = 10.0
 mpl.rcParams['font.weight'] = 'bold'
 from fancy_plot import fancy_plot
 from astropy.io import ascii
@@ -86,22 +86,50 @@ class cms2_plot:
         self.read_infit()
 
         self.figt,self.axt = plt.subplots(ncols=3,nrows=1,gridspec_kw={'width_ratios':[20,20,1]})
+        self.figi,self.axi = plt.subplots(nrows=2,ncols=2,sharey=True)
+
 #        self.grid = gridspec.GridSpec(1,3,width_ratios=[10,10,1],height_ratios=[1]) 
-        self.axt = [plt.subplot(i) for i in self.axt.ravel()]
+        self.axt = [i for i in self.axt.ravel()]
+        self.axi = [i for i in self.axi.ravel()]
+
+#xvalues for 4 figure plot
+        xfigs = ['axi','pol','free_energy','helicity']
+        names = {'axi': ['Axial','Mx'],'pol': ['Poloidal','Mx/cm'], 'free_energy' : ['Free Energy','ergs'], 'helicity': ['Helicity','Mx$^2$']}
        
        
+#set color for eruptions and non eruptive states
         self.tdat['color'] = 'black'
         self.tdat['color'][self.tdat['eruption'] == 'Yes'] = 'red'
 
         use = self.tdat['bfit_a_5'] > 0 #reject filled values
         print self.tdat['bfit_a_5'][use].max(),self.tdat['bfit_a_5'][use].min()
+#plot 4 panel plot
+        ccolor = plt.cm.jet #colors for cycling
+        ocolor = ccolor(np.linspace(0,1,self.tind))
+        for i in np.arange(self.tind)+self.sind:
+            for k,j in enumerate(self.axi): j.scatter(self.tdat[xfigs[k]][use],self.tdat['bfit_{0:1d}_5'.format(i)][use],c=ocolor[i],label='{0:1d}'.format(i)) 
 
+        for k,j in enumerate(self.axi): 
+            j.set_xlabel('{0} [{1}]'.format(*names[xfigs[k]]))
+            j.set_ylabel('Fit parameter')
+        self.axi[0].legend(loc='upper right')
+         
+
+#3D plot
         vmin =  0.0015
         vmax =  0.0025
         cmap =  plt.cm.Greys
         cmap =  plt.cm.Blues
         cax =self.axt[0].scatter(self.tdat['axi'][use],self.tdat['pol'][use],c=self.tdat['bfit_a_5'][use],cmap=cmap,vmin=vmin,vmax=vmax,edgecolor=self.tdat['color'][use])
         self.axt[1].scatter(self.tdat['free_energy'][use],self.tdat['helicity'][use],c=self.tdat['bfit_a_5'][use],cmap=cmap,vmin=vmin,vmax=vmax,edgecolor=self.tdat['color'][use])
+       
+        #set labels
+        self.axt[0].set_xlabel('Axial Flux [Mx]')
+        self.axt[0].set_ylabel('Poloidal Flux [Mx/cm]')
+        self.axt[1].set_xlabel('Free Energy [erg]')
+        self.axt[1].set_ylabel('Helicity [Mx$^2$]')
+ 
+     
 
 
         cbar = self.figt.colorbar(cax,cax=self.axt[2])
@@ -113,5 +141,5 @@ class cms2_plot:
 
         self.figt.savefig(self.cdir+self.bdir+'total_fit_{0:%Y%m%d%H%M%S}.png'.format(self.time),bbox_pad=.1,bbox_inches='tight')
         self.figt.savefig(self.cdir+self.bdir+'total_fit_{0:%Y%m%d%H%M%S}.eps'.format(self.time),bbox_pad=.1,bbox_inches='tight')
-        #self.figi.savefig(self.cdir+self.bdir+'indvd_fit_{0:%Y%m%d%H%M%S}.png'.format(self.time),bbox_pad=.1,bbox_inches='tight')
-        #self.figi.savefig(self.cdir+self.bdir+'indvd_fit_{0:%Y%m%d%H%M%S}.eps'.format(self.time),bbox_pad=.1,bbox_inches='tight')
+        self.figi.savefig(self.cdir+self.bdir+'indvd_fit_{0:%Y%m%d%H%M%S}.png'.format(self.time),bbox_pad=.1,bbox_inches='tight')
+        self.figi.savefig(self.cdir+self.bdir+'indvd_fit_{0:%Y%m%d%H%M%S}.eps'.format(self.time),bbox_pad=.1,bbox_inches='tight')
