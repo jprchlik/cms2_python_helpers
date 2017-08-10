@@ -2,7 +2,6 @@ import matplotlib as mpl
 mpl.rcParams['text.usetex'] = True
 mpl.rcParams['font.size'] = 10.0
 mpl.rcParams['font.weight'] = 'bold'
-from fancy_plot import fancy_plot
 from astropy.io import ascii
 from astropy.table import join
 import glob
@@ -11,6 +10,12 @@ from datetime import datetime,timedelta
 import matplotlib.gridspec as gridspec
 import matplotlib.pyplot as plt
 import numpy as np
+try:
+    from fancy_plot import fancy_plot
+    fp = True
+except:
+    print 'Fancy plot not in your python path please add'
+    fp = False
 
 
 class cms2_plot:
@@ -56,7 +61,10 @@ class cms2_plot:
         self.tdat = join(self.fdat,self.ldat,keys=['mod_nam'])
         self.comp_tsig()
         self.read_model()
+        #remove some bad coronal loops
 
+#use model id for abbicus
+        self.tdat['mod_id'] = [int(i.split('_')[0].replace('model','')) for i in self.tdat['mod_nam']]
 
     def comp_tsig(self):
         """Add total sigma to table"""
@@ -70,6 +78,9 @@ class cms2_plot:
         #fitting stat values 
         fsta = [i for i in bfit if ((("_5" in i) & ("_5_" not in i)) | ("_5_5" in i))]
 
+        #normalize minimums
+        for i in fsta: self.tdat[i] = self.tdat[i]/self.tdat[i][self.tdat[i] > 0.].min()
+
         #init new column
         self.tdat['bfit_t_5'] = 0.0
         self.tdat['bfit_s_5'] = 0.0
@@ -77,7 +88,11 @@ class cms2_plot:
         for i in fsta: self.tdat['bfit_s_5'] = self.tdat[i]+self.tdat['bfit_s_5']**2.#sq. total uncertainty
         self.tdat['bfit_a_5'] = self.tdat['bfit_t_5']/self.tind #average 
         self.tdat['bfit_s_5'] = (self.tdat['bfit_s_5'])**.5/self.tind #sum squared average 
-      
+
+        #uncertainty in average
+        self.tdat['bfit_u_5'] = 0.0
+        for i in fsta: self.tdat['bfit_u_5'] = (self.tdat[i]-self.tdat['bfit_a_5'])**2.+self.tdat['bfit_u_5']
+        self.tdat['bfit_u_5'] = np.sqrt(self.tdat['bfit_u_5'])/float(self.tind)
         
 
 
@@ -85,8 +100,11 @@ class cms2_plot:
         """Create plots using the best fit data"""
         self.read_infit()
 
-        self.figt,self.axt = plt.subplots(ncols=3,nrows=1,gridspec_kw={'width_ratios':[20,20,1]})
+        self.figt,self.axt = plt.subplots(ncols=3,nrows=1,gridspec_kw={'width_ratios':[50,50,10]},figsize=(8,4))
+        #self.figt.subplots_adjust(wspace=0.6)
         self.figi,self.axi = plt.subplots(nrows=2,ncols=2,sharey=True)
+        #model number plots
+        self.figm,self.axm = plt.subplots()
 
 #        self.grid = gridspec.GridSpec(1,3,width_ratios=[10,10,1],height_ratios=[1]) 
         self.axt = [i for i in self.axt.ravel()]
@@ -107,25 +125,45 @@ class cms2_plot:
         ccolor = plt.cm.jet #colors for cycling
         ocolor = ccolor(np.linspace(0,1,self.tind))
         for i in np.arange(self.tind)+self.sind:
-            for k,j in enumerate(self.axi): j.scatter(self.tdat[xfigs[k]][use],self.tdat['bfit_{0:1d}_5'.format(i)][use],c=ocolor[i],label='{0:1d}'.format(i)) 
+        #plot as a function of model number
+            self.axm.scatter(self.tdat['mod_id'][use].astype('float'),self.tdat['bfit_{0:1d}_5'.format(i)][use].astype('float'),c=ocolor[i],label='{0:1d}'.format(i)) 
+            for k,j in enumerate(self.axi): j.scatter(self.tdat[xfigs[k]][use].astype('float'),self.tdat['bfit_{0:1d}_5'.format(i)][use].astype('float'),c=ocolor[i],label='{0:1d}'.format(i)) 
+
 
         for k,j in enumerate(self.axi): 
             j.set_xlabel('{0} [{1}]'.format(*names[xfigs[k]]))
-            j.set_ylabel('Fit parameter')
-        self.axi[0].legend(loc='upper right')
+            j.set_ylabel('Normed Quad. Mean Dis.')
+        self.axi[0].legend(loc='upper left',frameon=False,fontsize=4)
+        #self.pol[0].set_ylim([-3.5,-2.])
+        self.axi[0].set_yscale('log')
+        self.axi[0].set_xscale('log')
+        self.axi[1].set_xscale('log')
+        #self.axi[0].set_ylim([0.0001,0.01])
          
+#model fit parameter fit labels
+        self.axm.scatter(self.tdat['mod_id'][use],self.tdat['bfit_a_5'][use].astype('float'),marker='x',c='black',label='Ave.')
+        self.axm.errorbar(self.tdat['mod_id'][use],self.tdat['bfit_a_5'][use].astype('float'),yerr=self.tdat['bfit_u_5'][use],fmt='x',c='black',label=None,markersize=1)
+        self.axm.set_ylabel('Normed Quad. Mean Dis.')
+        self.axm.set_xlabel('Model ID')
+        self.axm.set_yscale('log')
+
 
 #3D plot
         vmin =  0.0015
         vmax =  0.0025
+        vmin =  1.00
+        vmax =  2.0
         cmap =  plt.cm.Greys
         cmap =  plt.cm.Blues
-        cax =self.axt[0].scatter(self.tdat['axi'][use],self.tdat['pol'][use],c=self.tdat['bfit_a_5'][use],cmap=cmap,vmin=vmin,vmax=vmax,edgecolor=self.tdat['color'][use])
+        cax =self.axt[0].scatter(self.tdat['axi'][use].astype('float'),self.tdat['pol'][use].astype('float'),c=self.tdat['bfit_a_5'][use],cmap=cmap,vmin=vmin,vmax=vmax,edgecolor=self.tdat['color'][use])
         self.axt[1].scatter(self.tdat['free_energy'][use],self.tdat['helicity'][use],c=self.tdat['bfit_a_5'][use],cmap=cmap,vmin=vmin,vmax=vmax,edgecolor=self.tdat['color'][use])
        
         #set labels
         self.axt[0].set_xlabel('Axial Flux [Mx]')
         self.axt[0].set_ylabel('Poloidal Flux [Mx/cm]')
+        self.axt[0].set_yscale('log')
+        self.axt[0].set_xscale('log')
+ 
         self.axt[1].set_xlabel('Free Energy [erg]')
         self.axt[1].set_ylabel('Helicity [Mx$^2$]')
  
@@ -133,13 +171,21 @@ class cms2_plot:
 
 
         cbar = self.figt.colorbar(cax,cax=self.axt[2])
+        cbar.set_label('Normed Quad. Mean Dis.')
  #       self.axt[1,1].scatter(self.tdat['free_energy'][use],self.tdat['helicity'][use],c=self.tdat['bfit_s_5'][use],cmap=plt.cm.magma,vmin= 0.00015,vmax=0.000600)
+#Use fancy plot if module exists
+        if fp:
+            fancy_plot(self.axm)
+            for i in self.axt: fancy_plot(i)
+            for i in self.axi: fancy_plot(i)
 
-        for i in self.axt: fancy_plot(i)
+        self.figt.tight_layout()
 
 
 
         self.figt.savefig(self.cdir+self.bdir+'total_fit_{0:%Y%m%d%H%M%S}.png'.format(self.time),bbox_pad=.1,bbox_inches='tight')
         self.figt.savefig(self.cdir+self.bdir+'total_fit_{0:%Y%m%d%H%M%S}.eps'.format(self.time),bbox_pad=.1,bbox_inches='tight')
         self.figi.savefig(self.cdir+self.bdir+'indvd_fit_{0:%Y%m%d%H%M%S}.png'.format(self.time),bbox_pad=.1,bbox_inches='tight')
+        self.figm.savefig(self.cdir+self.bdir+'model_fit_{0:%Y%m%d%H%M%S}.eps'.format(self.time),bbox_pad=.1,bbox_inches='tight')
+        self.figm.savefig(self.cdir+self.bdir+'model_fit_{0:%Y%m%d%H%M%S}.png'.format(self.time),bbox_pad=.1,bbox_inches='tight')
         self.figi.savefig(self.cdir+self.bdir+'indvd_fit_{0:%Y%m%d%H%M%S}.eps'.format(self.time),bbox_pad=.1,bbox_inches='tight')
