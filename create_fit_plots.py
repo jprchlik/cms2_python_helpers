@@ -49,8 +49,16 @@ class cms2_plot:
             axi.append(fil[-3].split()[-1]) #get axial flux
          
         #add axial and poloidal flux to main table    
-        self.tdat['axi'] = np.array(axi)
-        self.tdat['pol'] = np.array(pol)
+        self.tdat['axi'] = np.array(axi).astype('float')
+        self.tdat['pol'] = np.array(pol).astype('float')
+
+
+        
+        #sort in order of polodial then axial fluxes
+        self.tdat.sort(['pol','axi'])
+
+        #set up plotting order based on pol and axi fluxes
+        self.tdat['plot_id'] = np.arange(self.tdat['pol'].size)
             
 
     def read_infit(self):
@@ -59,6 +67,7 @@ class cms2_plot:
         self.fdat = ascii.read(self.cdir+self.bdir+self.ifit)
         self.ldat = ascii.read(self.cdir+self.bdir+self.loop)
         self.tdat = join(self.fdat,self.ldat,keys=['mod_nam'])
+
         self.comp_tsig()
         self.read_model()
         #remove some bad coronal loops
@@ -126,7 +135,7 @@ class cms2_plot:
         ocolor = ccolor(np.linspace(0,1,self.tind))
         for i in np.arange(self.tind)+self.sind:
         #plot as a function of model number
-            self.axm.scatter(self.tdat['mod_id'][use].astype('float'),self.tdat['bfit_{0:1d}_5'.format(i)][use].astype('float'),c=ocolor[i],label='{0:1d}'.format(i)) 
+            self.axm.scatter(self.tdat['plot_id'][use].astype('float'),self.tdat['bfit_{0:1d}_5'.format(i)][use].astype('float'),c=ocolor[i],label='{0:1d}'.format(i)) 
             for k,j in enumerate(self.axi): j.scatter(self.tdat[xfigs[k]][use].astype('float'),self.tdat['bfit_{0:1d}_5'.format(i)][use].astype('float'),c=ocolor[i],label='{0:1d}'.format(i)) 
 
 
@@ -134,18 +143,64 @@ class cms2_plot:
             j.set_xlabel('{0} [{1}]'.format(*names[xfigs[k]]))
             j.set_ylabel('Normed Quad. Mean Dis.')
         self.axi[0].legend(loc='upper left',frameon=False,fontsize=4)
-        #self.pol[0].set_ylim([-3.5,-2.])
+        #self.pol[0].set_ylbot[-3.5,-2.])
         self.axi[0].set_yscale('log')
         self.axi[0].set_xscale('log')
         self.axi[1].set_xscale('log')
         #self.axi[0].set_ylim([0.0001,0.01])
          
 #model fit parameter fit labels
-        self.axm.scatter(self.tdat['mod_id'][use],self.tdat['bfit_a_5'][use].astype('float'),marker='x',c='black',label='Ave.')
-        self.axm.errorbar(self.tdat['mod_id'][use],self.tdat['bfit_a_5'][use].astype('float'),yerr=self.tdat['bfit_u_5'][use],fmt='x',c='black',label=None,markersize=1)
+        self.axm.scatter(self.tdat['plot_id'][use],self.tdat['bfit_a_5'][use].astype('float'),marker='x',c='black',label='Ave.')
+        self.axm.errorbar(self.tdat['plot_id'][use],self.tdat['bfit_a_5'][use].astype('float'),yerr=self.tdat['bfit_u_5'][use],fmt='x',c='black',label=None,markersize=1)
         self.axm.set_ylabel('Normed Quad. Mean Dis.')
-        self.axm.set_xlabel('Model ID')
+        self.axm.set_xlabel('Axial Flux [Mx]/Poloidal Flux [Mx/cm]')
         self.axm.set_yscale('log')
+
+#set up nested plot labels
+#for the value closer to the axis (axial flux)
+        xticks_top = [i for i in self.tdat['plot_id'][use]]
+        xticks_val = ['{0:3.1e}'.format(float(i)) for i in self.tdat['axi'][use]]
+#create vertical alignment  array
+        xticks_vrt = [0]*len(xticks_top)
+
+#for the values farther from the axis (axial flux)
+        #unique poloidal fluxes
+        u_pol = np.unique(self.tdat['pol'][use])
+        #save starting point ending point and median
+        xticks_bot_st = []
+        xticks_bot_nd = []
+        #find first instance of axial flux value
+        #store values in lists
+        for i in u_pol:
+            tix_p, = np.where(self.tdat['pol'] == i)
+            xticks_bot_st.append(np.min(self.tdat['plot_id'][tix_p])-0.75)
+            xticks_bot_nd.append(np.max(self.tdat['plot_id'][tix_p])+0.75)
+            #use the starting and end points to create a mid point for the ticks
+            xticks_top.append(round((int(xticks_bot_nd[-1])-int(xticks_bot_st[-1]))/2.+int(xticks_bot_st[-1])+.5))
+            xticks_val.append('{0:3.1e}'.format(float(i)))
+            #offset vertical plotting point
+            xticks_vrt.append(-.15)
+
+        #sort by tick value
+        sorter = np.argsort(xticks_top)
+        xticks_top = np.array(xticks_top)[sorter]
+        xticks_val = np.array(xticks_val)[sorter]
+        xticks_vrt = np.array(xticks_vrt)[sorter]
+ 
+
+        #create xticks with new labals
+        self.axm.set_xticks(xticks_top)
+        self.axm.set_xticks(xticks_bot_st,minor=True)
+        self.axm.set_xticklabels(xticks_val)
+
+        #adjust vertical offset
+        for j,i in zip(self.axm.get_xticklabels(),xticks_vrt): 
+            j.set_y(i)
+            if i > -.02: j.set_rotation(90)
+                
+
+        #make long bars for minor ticks
+        self.axm.tick_params(axis='x',which='minor',direction='out',length=55.001)
 
 
 #3D plot
@@ -175,7 +230,11 @@ class cms2_plot:
  #       self.axt[1,1].scatter(self.tdat['free_energy'][use],self.tdat['helicity'][use],c=self.tdat['bfit_s_5'][use],cmap=plt.cm.magma,vmin= 0.00015,vmax=0.000600)
 #Use fancy plot if module exists
         if fp:
-            fancy_plot(self.axm)
+            #fancy_plot(self.axm)
+            self.axm.grid(which='minor',color='black',linestyle='--',linewidth=1,axis='x')
+            self.axm.yaxis.set_tick_params(which='both',direction='in')
+            self.axm.yaxis.set_tick_params(which='major',length=7)
+            self.axm.yaxis.set_tick_params(which='minor',length=3)
             for i in self.axt: fancy_plot(i)
             for i in self.axi: fancy_plot(i)
 
