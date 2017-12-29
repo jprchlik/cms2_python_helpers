@@ -1,9 +1,11 @@
+Python Helpers for CMS2
+=======================
 A script set to assist in cutting down some of the monotony associated with running CMS2 and relaxing the force free model.
 These scripts support CMS2 so they cannot be ran one immediately after another, but are only broken by required user interaction in CMS2.
 An example run through follows:
 
 Download supporting observational files.
->python grab_sigmoid_download_wrapper.py -t "2009/02/17 11:44:01" 
+>python\> grab_sigmoid_download_wrapper.py -t "2009/02/17 11:44:01" 
 
 RUN CMS2 for model1 and trace a flux rope path.
 
@@ -14,14 +16,15 @@ it copies most of the information from model1)
 Run CMS2 on the remaining 47 models by loading the previously created model and flux rope path files 
 
 Relax all models created defined in CMS2 using input files created in the previous python script
->python fff2_input_models_wrapper.py -t "2009/02/17 11:44:01"
+>python\> fff2_input_models_wrapper.py -t "2009/02/17 11:44:01"
 
 NOW wait a long time for all CMS2 models to relax (may take a month).
 
 The script and file list explanations are as follows:
 
 
-#create_model_files.py and create_model_files_wrapper.py
+create_model_files.py and create_model_files_wrapper.py
+----------------
 These scripts are only useful after you ran CMS2 in idl previous,
 thus creating as model1 and associated files.
 The create_model_files_wrapper.py command line utility calls create_model_files.py to do the heavy lifting.
@@ -57,7 +60,8 @@ The input file is used by fff2.90 code to generate a series of relaxed force fre
 
 
 
-#fff2_input_models.py and fff2_input_models_wrapper.py
+fff2_input_models.py and fff2_input_models_wrapper.py
+----------------
 fff2_input_models relaxes the different axial and poloidal models created in CMS2.
 Therefore, it is only useful after you ran models through CMS2.
 The code preforms the task in parallel using multiprocessing Pool and creating new c-shell or just loops through the models if the users prefers that.
@@ -86,7 +90,8 @@ or using the alias
 fimw -t "2009/02/17 11:44:01"
 
 
-#grab_sigmoid_fits_files.py and grab_sigmoid_download_wrapper.py
+grab_sigmoid_fits_files.py and grab_sigmoid_download_wrapper.py
+----------------
 These two scripts in combination produce the observational file necessary to run CMS2.
 grab_sigmoid_downloa_ wrapper is the command line wrapper which call grab_sigmoid_fits_fitles.
 You may call grab_sigmoid_download_wrapper by typing "python grab_sigmoid_download_wrapper.py -t <--time> -c <--cmsdir> -o <--outdir>".
@@ -118,7 +123,8 @@ Then the code downloads the nearest 4 minutes (+/-2 minutes) of STEREO SECCHI ob
 Finally, it downloads a high resolution magnetogram from either mdi (before  or hmi from the VSO.
 
 
-#cms2_dir
+cms2_dir
+----------------
 The location of your CMS2 directory, which create_model_files.py and grab_sigmoid_fits_files.py respectively use to copy and download files.
 The directory must be placed on the first line of the file with no other text.
 
