@@ -5,7 +5,7 @@ These scripts support CMS2 so they cannot be ran one immediately after another, 
 An example run through follows:
 
 Download supporting observational files.
->python\> grab_sigmoid_download_wrapper.py -t "2009/02/17 11:44:01" 
+>python grab_sigmoid_download_wrapper.py -t "2009/02/17 11:44:01" 
 
 RUN CMS2 for model1 and trace a flux rope path.
 
@@ -16,7 +16,7 @@ it copies most of the information from model1)
 Run CMS2 on the remaining 47 models by loading the previously created model and flux rope path files 
 
 Relax all models created defined in CMS2 using input files created in the previous python script
->python\> fff2_input_models_wrapper.py -t "2009/02/17 11:44:01"
+>python fff2_input_models_wrapper.py -t "2009/02/17 11:44:01"
 
 NOW wait a long time for all CMS2 models to relax (may take a month).
 
@@ -40,11 +40,11 @@ alias cmfw "/PATHTO/CMS2HELPERS/create_model_files_wrapper.py"
 
 Examples:
 
-python create_model_files_wrapper.py -t "2009/02/17 11:44:01"
+>python create_model_files_wrapper.py -t "2009/02/17 11:44:01"
 
 or using the alias
 
-cmfw -t "2009/02/17 11:44:01"
+>cmfw -t "2009/02/17 11:44:01"
 
 create_model_files_wrapper works by calling the class create_cms2_files in create_model_files.py.
 The first task which uses the create_cms2_files is modelXX_setup file for all 47 models 
@@ -83,11 +83,11 @@ alias fimw "/PATHTO/CMS2HELPERS/fff2_input_models_wrapper.py"
 
 Examples:
 
-python fff2_input_models_wrapper.py -t "2009/02/17 11:44:01"
+>python fff2_input_models_wrapper.py -t "2009/02/17 11:44:01"
 
 or using the alias
 
-fimw -t "2009/02/17 11:44:01"
+>fimw -t "2009/02/17 11:44:01"
 
 
 grab_sigmoid_fits_files.py and grab_sigmoid_download_wrapper.py
@@ -105,11 +105,11 @@ alias gsff "/PATHTO/CMS2HELPERS/grab_sigmoid_fits_files.py"
 
 Examples:
 
-python grab_sigmoid_download_wrapper.py -t "2009/02/17 11:44:01" 
+>python grab_sigmoid_download_wrapper.py -t "2009/02/17 11:44:01" 
 
 or using the alias
 
-gsff -t "2009/02/17 11:44:01"
+>gsff -t "2009/02/17 11:44:01"
 
 
 
