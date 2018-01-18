@@ -225,6 +225,8 @@ class download_cms_files:
     def get_euv(self):
         if self.dttime >= self.sdo_start:
             self.get_aia()
+            #include get stereo on recent observaitons J. Prchlik (2018/01/18)
+            self.get_stereo()
         else:
             self.get_stereo()
 
