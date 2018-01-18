@@ -149,7 +149,14 @@ class download_cms_files:
         brot = prot-1
         arot = prot+1
 
+        #only get 3 carrington rotations
         rot_list = [brot,prot,arot]
+        #only get exact carrington rotation number
+        rot_list = [prot]
+
+        #NSO synoptic maps only go until 2166
+        if self.rotnum > 2166:
+            print("Carrington rotation {0:1.0f} is beyond NSO archive".format(self.rotnum))
 
         for rot in rot_list:
             fname = self.forfil.format(rot)
@@ -157,12 +164,15 @@ class download_cms_files:
             #see if file exists with or without .gz
             testfile = ((os.path.isfile(self.cmsdir+self.basedir+fname)) | (os.path.isfile(self.cmsdir+self.basedir+fname[:-3])))
 
-
+            #if file does not exist download new file
             if testfile == False:
-                fhandle = open(self.cmsdir+self.basedir+fname,'wb')
-                self.ftp.retrbinary('RETR {0}'.format(fname),fhandle.write)
-                fhandle.close()
-                self.unzip_fil(self.cmsdir+self.basedir+fname)
+                try:
+                    fhandle = open(self.cmsdir+self.basedir+fname,'wb')
+                    self.ftp.retrbinary('RETR {0}'.format(fname),fhandle.write)
+                    fhadle.close()
+                    self.unzip_fil(self.cmsdir+self.basedir+fname)
+                except:
+                    print("Unable to download carrington rotation map at {0}".format(fname))
 
 #unzip carrington file
     def unzip_fil(self,fname):
@@ -176,7 +186,8 @@ class download_cms_files:
     def get_aia(self):
         #Get Stereo observations
         client = vso.VSOClient()
-        dt = timedelta(minutes=1)
+        #reduced time to 12 seconds for AIA observation download J. Prchlik 2018/01/18
+        dt = timedelta(seconds=12)
         start = datetime.strftime(self.dttime-dt,self.sform)
         end = datetime.strftime(self.dttime+dt,self.sform)
     
