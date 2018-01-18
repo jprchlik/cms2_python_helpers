@@ -156,12 +156,15 @@ class download_cms_files:
 
         #NSO synoptic maps only go until 2166
         if self.rotnum > 2166:
+           #Use HMI synoptics
            import urllib2
-           fname = 'hmi.Synoptic_Ml.{0:1.0f}.fits'.format(self.rotnum)
+           fname = 'hmi.Synoptic_Mr_small.{0:1.0f}.fits'.format(self.rotnum)
            hmi_url = 'http://jsoc.stanford.edu/data/hmi/synoptic/'+fname
            res = urllib2.urlopen(hmi_url)
+           #read binary fits file
            f_carrot = res.read()
 
+           #write fits file locally
            with open(self.cmsdir+self.basedir+fname,'wb') as f:
                f.write(f_carrot)
             #print("Carrington rotation {0:1.0f} is beyond NSO archive".format(self.rotnum))
