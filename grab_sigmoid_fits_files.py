@@ -156,23 +156,28 @@ class download_cms_files:
 
         #NSO synoptic maps only go until 2166
         if self.rotnum > 2166:
-            print("Carrington rotation {0:1.0f} is beyond NSO archive".format(self.rotnum))
+           import urllib2
+           hmi_url = 'http://jsoc.stanford.edu/data/hmi/synoptic/hmi.Synoptic_Ml.{0:1.0f}.fits'
+           res = urllib2.urlopen(hmi_url.format(self.rotnum))
+           html = res.read()
+            #print("Carrington rotation {0:1.0f} is beyond NSO archive".format(self.rotnum))
 
-        for rot in rot_list:
-            fname = self.forfil.format(rot)
+        else:
+            for rot in rot_list:
+                fname = self.forfil.format(rot)
 
-            #see if file exists with or without .gz
-            testfile = ((os.path.isfile(self.cmsdir+self.basedir+fname)) | (os.path.isfile(self.cmsdir+self.basedir+fname[:-3])))
+                #see if file exists with or without .gz
+                testfile = ((os.path.isfile(self.cmsdir+self.basedir+fname)) | (os.path.isfile(self.cmsdir+self.basedir+fname[:-3])))
 
-            #if file does not exist download new file
-            if testfile == False:
-                try:
-                    fhandle = open(self.cmsdir+self.basedir+fname,'wb')
-                    self.ftp.retrbinary('RETR {0}'.format(fname),fhandle.write)
-                    fhadle.close()
-                    self.unzip_fil(self.cmsdir+self.basedir+fname)
-                except:
-                    print("Unable to download carrington rotation map at {0}".format(fname))
+                #if file does not exist download new file
+                if testfile == False:
+                    try:
+                        fhandle = open(self.cmsdir+self.basedir+fname,'wb')
+                        self.ftp.retrbinary('RETR {0}'.format(fname),fhandle.write)
+                        fhadle.close()
+                        self.unzip_fil(self.cmsdir+self.basedir+fname)
+                    except:
+                        print("Unable to download carrington rotation map at {0}".format(fname))
 
 #unzip carrington file
     def unzip_fil(self,fname):
