@@ -14,7 +14,7 @@ import shutil
 class download_cms_files:
 
 # inital information about the directoies and time for sigmoid
-    def __init__(self,time='2009/02/17 11:44:00',nproc=4,cmsdir='',outdir='%Y/%m/%d/%H%M/'):
+    def __init__(self,time='2009/02/17 11:44:00',nproc=4,cmsdir='',outdir='%Y/%m/%d/%H%M/',x=None,y=None):
         """Sets up inital variables to pass to rest of download_cms_file functions.
            Really only need to set the input time string "YYYY/MM/DD HH:MM:SS" and full path to the CMS2 directory.
            Then assuming you set up the sigmoid directory to be YYYY/MM/DD/HHMM (can change with outdir variable if needed) you are set."""
@@ -26,6 +26,9 @@ class download_cms_files:
         self.dttime = datetime.strptime(self.time,self.sform)
         self.basedir = datetime.strftime(self.dttime,outdir)
         self.cmsdir = cmsdir
+        self.x = x
+        self.y = y
+        print(self.x,self.y)
 
 #start date from using sdo data
         self.sdo_start =  datetime(2010,05,01,00,00,00)
@@ -65,31 +68,40 @@ class download_cms_files:
 #get list of files in timerange
     def xrt_file_list(self):
         
-#get formatted list of hours
+        #get formatted list of hours
         self.xrt_hours = []
         for i in self.xrt_beg: self.xrt_hours.append('H{0:%H}00'.format(i)) 
         for i in self.xrt_end: self.xrt_hours.append('H{0:%H}00'.format(i)) 
 
-#get unique hours
+        #get unique hours
         self.xrt_hours = unique(self.xrt_hours)
         
-#get all files in hours and their associated times
+        #get all files in hours and their associated times
         self.xrt_files = []
 
-#loop over unique hours
+        #loop over unique hours
         for i in self.xrt_hours:
             tempfiles = glob.glob('{0}/{1}/*fits'.format(self.hinode_arch,i))
             for j in tempfiles:
                 temptime = datetime.strptime(j.split('/')[-1].split('.')[0],'L1_XRT%Y%m%d_%H%M%S')
-#check if time is in range
+                #check if time is in range
                 for k in range(len(self.xrt_beg)):
                    if ((temptime >= self.xrt_beg[k]) & (temptime <= self.xrt_end[k])):
-#check if header information is compatible with a syntopic
+                       #check if header information is compatible with a syntopic
                        dat = fits.open(j)
                        hdr = dat[0].header
-#check header information on fits files to get just synoptics
-                       if ((hdr['NAXIS1'] == 1024) & (hdr['NAXIS2'] == 1024) & ((hdr['EC_FW2_'] == 'Ti_poly') | (hdr['EC_FW1_'] == 'Al_poly') | (hdr['EC_FW2_'] == 'Al_mesh') | (hdr['EC_FW1_'] == 'Be_thin') | (hdr['EC_FW2_'] != 'Gband'))):
+
+                       #check for acceptable filters
+                       fil_check = (((hdr['EC_FW2_'] == 'Ti_poly') | (hdr['EC_FW1_'] == 'Al_poly') | (hdr['EC_FW2_'] == 'Al_mesh') | (hdr['EC_FW1_'] == 'Be_thin') | (hdr['EC_FW2_'] != 'Gband')))
+                       #check header information on fits files to get just synoptics
+                       if ((hdr['NAXIS1'] == 1024) & (hdr['NAXIS2'] == 1024) & (fil_check)):
                            self.xrt_files.append(j)
+                       #check to make sure self.x and self.y are defined
+                       if ((self.x != None) & (self.y != None)):
+                            #Also check to see if there are any small FOV XRT files within 100'' of y and x
+                           dist = (((hdr['CRVAL1']-self.x)**2.+(hdr['CRVAL2']-self.y)**2.))**.5
+                           if ((dist  <= 100) & (fil_check)):
+                               self.xrt_files.append(j)
 
      
         
@@ -119,7 +131,25 @@ class download_cms_files:
             if 'synoptic' in i.lower():
                 end = True
                 self.xrt_beg.append(datetime.strptime(i[20:39],timefmt))
- 
+
+            #if you want to look for local AR files
+            if ((self.x != None) & (self.y != None)):
+                #check for nearby pointings with small FoV J. Prchlik 2018/01/24
+                try:
+                    p_x = float(i[73:78]) 
+                    p_y = float(i[79:87])  
+                #if values are not floats continue
+                except:
+                    continue
+                
+                #distance from pointing to planned AR
+                dist = (((p_x-self.x)**2.+(p_y-self.y)**2.))**.5
+                #if distance less than 100'' from AR add to list to look for XRT files
+                if dist < 100: 
+                    end = True
+                    self.xrt_beg.append(datetime.strptime(i[20:39],timefmt))
+     
+                           
 
 
 #find carrington rotation number and as politely for the files
@@ -351,9 +381,18 @@ class download_cms_files:
 #download all
     def download_all(self):
         self.get_hinode()
-        self.get_euv()
-        self.get_carrington()
-        self.get_magnetogram()
+        try:
+            self.get_euv()
+        except:
+            print('Could not retrieve EUV images')
+        try:
+            self.get_carrington()
+        except:
+            print('Could not retrieve Carrington Rotation Mag.')
+        try:
+            self.get_magnetogram()
+        except:
+            print('Could not retrieve High Resoution Mag.')
 
 #create subdirectory tree
     def build_subtree(self):
