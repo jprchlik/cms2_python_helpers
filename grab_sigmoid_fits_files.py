@@ -460,8 +460,40 @@ class download_cms_files:
 
             shutil.move(self.cmsdir+self.basedir+sfile,self.cmsdir+self.basedir+stime+'_'+sfile)
 
-#get hmi magnetogram
+    #Get AIA 1024x1024  synoptics from Stanford, since CMS2 cannot handle 4096x4096 files
     def get_hmi(self):
+        import urllib
+
+        #hmi archive location
+        hmi_arch = 'http://jsoc.stanford.edu/data/hmi/fits/'
+
+        #check if current minute is even, since synoptics are every 2 minutes
+        if self.dttime.minute == 0:
+            inp_time = self.dttime
+        #otherwise add 1 minute to current time
+        else:
+            inp_time = self.dttime+timedelta(minutes=60)
+
+        #reduced time to 12 seconds for AIA observation download J. Prchlik 2018/01/24
+        dt = timedelta(minutes=60)
+        start = inp_time-dt
+        end   = inp_time
+
+        #create full file path hmi
+        f_dir = '{0:%Y/%m/%d/hmi.M_720s.%Y%m%d_%H0000_TAI.fits}'
+        s_fil = f_dir.format(start)
+        e_fil = f_dir.format(end)
+
+        #see if files already exsist
+        s_tst = os.path.isfile(self.cmsdir+self.basedir+s_fil.split('/')[-1]) == False
+        e_tst = os.path.isfile(self.cmsdir+self.basedir+e_fil.split('/')[-1]) == False
+     
+        #download files from archive
+        if s_tst: urllib.urlretrieve(hmi_arch+s_fil,self.cmsdir+self.basedir+s_fil.split('/')[-1]) 
+        if e_tst: urllib.urlretrieve(hmi_arch+e_fil,self.cmsdir+self.basedir+e_fil.split('/')[-1]) 
+
+#get hmi magnetogram
+    def get_hmi_vso(self):
         client = vso.VSOClient()
         dt = timedelta(minutes=1)
         start = datetime.strftime(self.dttime-dt,self.sform)
