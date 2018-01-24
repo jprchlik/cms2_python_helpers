@@ -338,12 +338,24 @@ class download_cms_files:
 
             #list of files to download
             d_list = []
-            #check datetime in list is between start and end
-            for fil in flat_list:
-                #get datetime from list
-                obs_time = datetime.strptime(fil.split('/')[-1][:15],'%Y%m%d_%H%M%S')
-                #if in time range add to download list
-                if ((obs_time >= start) & (obs_time <= end)): d_list.append(fil)
+
+
+            #time reange for looping
+            t_r = 1
+            #try expanding the time search range
+            loop = True 
+            #make sure you get at least 4 files
+            while ((len(d_list) <= 4) & (loop)):
+                #check datetime in list is between start and end
+                for fil in flat_list:
+                    #get datetime from list
+                    obs_time = datetime.strptime(fil.split('/')[-1][:15],'%Y%m%d_%H%M%S')
+                    #if in time range add to download list
+                    if ((obs_time >= self.dttime-(dt*t_r)) & (obs_time <= self.dttime+(dt*t_r))): d_list.append(fil)
+                #increment index
+                t_r += 1
+                #don't loop more than 5 times
+                if t_r > 6: loop = False
 
             #finally download stereo files
             for fil in d_list:
