@@ -195,6 +195,46 @@ class download_cms_files:
                 for line in infile:
                     outfile.write(line)
 
+    #Get AIA 1024x1024  synoptics from Stanford, since CMS2 cannot handle 4096x4096 files
+    def get_aia_syn(self):
+        import urllib
+
+        #synoptic archive location
+        syn_arch = 'http://jsoc.stanford.edu/data/aia/synoptic/'
+
+        #check if current minute is even, since synoptics are every 2 minutes
+        if self.dttime.minute % 2 == 0:
+            inp_time = self.dttime
+        #otherwise add 1 minute to current time
+        else:
+            inp_time = self.dttime+timedelta(minutes=1)
+
+        #reduced time to 12 seconds for AIA observation download J. Prchlik 2018/01/24
+        dt = timedelta(minutes=2)
+        start = inp_time-dt
+        end   = inp_time
+
+        #wavelengths to download
+        d_wav = [131,171,193,211,304]
+
+        #create directory path minus the wavelength
+        f_dir = '{0:%Y/%m/%d/H%H00/AIA%Y%m%d_%H%M_}'
+        s_dir = f_dir.format(start)
+        e_dir = f_dir.format(end)
+
+        #wavelength format
+        w_fmt = '{0:04d}.fits'
+     
+        #download files from archive for each wavelength
+        for i in d_wav:
+           #format wavelength
+           w_fil = w_fmt.format(i)
+           urllib.urlretrieve(syn_arch+s_dir+w_fil,self.cmsdir+self.basedir+s_dir.split('/')[-1]+w_fil) 
+           urllib.urlretrieve(syn_arch+e_dir+w_fil,self.cmsdir+self.basedir+e_dir.split('/')[-1]+w_fil) 
+      
+
+
+    #Get aia files from VSO
     def get_aia(self):
         #Get Stereo observations
         client = vso.VSOClient()
@@ -247,7 +287,8 @@ class download_cms_files:
 #Download EUV images
     def get_euv(self):
         if self.dttime >= self.sdo_start:
-            self.get_aia()
+            #self.get_aia()
+            self.get_aia_syn()
             #include get stereo on recent observaitons J. Prchlik (2018/01/18)
             self.get_stereo()
         else:
