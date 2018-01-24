@@ -24,6 +24,9 @@ def main(argv):
     for i in range(len(inargs2)): helpinfo = helpinfo+' -'+snargs1[i]+' <--'+inargs2[i]+'> : '+argsdes[i]+'\n'
 
 
+    #Usage Example
+    helpinfo = helpinfo+'\n Example: python grab_sigmoid_download_wrapper.py -t "2008/01/12 00:00:00"'
+
 #load user values
     try:
         opts,args = getopt.getopt(argv,inargs1,inargs2)
