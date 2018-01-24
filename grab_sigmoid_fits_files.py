@@ -211,7 +211,7 @@ class download_cms_files:
                     try:
                         fhandle = open(self.cmsdir+self.basedir+fname,'wb')
                         self.ftp.retrbinary('RETR {0}'.format(fname),fhandle.write)
-                        fhadle.close()
+                        fhandle.close()
                         self.unzip_fil(self.cmsdir+self.basedir+fname)
                     except:
                         print("Unable to download carrington rotation map at {0}".format(fname))
@@ -295,9 +295,96 @@ class download_cms_files:
         res4 = client.get(qr4,path=self.cmsdir+self.basedir+'{file}').wait()
 
 
+    #grab stereo files from stereo archive 
+    def grab_stereo(self):
+        #look in both stereo ahead and behind
+        beacons = ['ahead','behind']
+
+        #set time range around to look for stereo files
+        dt = timedelta(minutes=30)
+        start = self.dttime-dt
+        end = self.dttime+dt
+
+        #base directory for start and end directory 
+        f_bdir = '{0:%Y%m%d}/*fts'
+        s_bdir = f_bdir.format(start)
+        e_bdir = f_bdir.format(end)
+
+        #loop over subdirectories if start and end time cross days
+        if s_bdir == e_bdir: 
+            l_dir = [s_bdir]
+        else:
+            l_dir = [s_bdir,e_bdir]
+
+        #loop over stereo ahead and behind
+        for bea in beacons:
+            #change to stereo ahead and behind directory continue if directories do not exist
+            try:
+                self.s_ftp.cwd('/pub/beacon/{0}/secchi/img/euvi/'.format(bea))
+            except:
+                print('No STEREO {0} OBS'.format(bea)) 
+                continue
+
+            #get list of files in subdirectory
+            fit_list = []
+            try:
+                for days in l_dir: fit_list.append(self.s_ftp.nlst(days))
+            except:
+                print('No STEREO {0} OBS at {1}'.format(bea,days)) 
+                continue
+
+            #flatten the list
+            flat_list = [item for sublist in fit_list for item in sublist]
+
+            #list of files to download
+            d_list = []
+            #check datetime in list is between start and end
+            for fil in flat_list:
+                #get datetime from list
+                obs_time = datetime.strptime(fil.split('/')[-1][:15],'%Y%m%d_%H%M%S')
+                #if in time range add to download list
+                if ((obs_time >= start) & (obs_time <= end)): d_list.append(fil)
+
+            #finally download stereo files
+            for fil in d_list:
+                fname = fil.split('/')[-1] 
+                testfile = os.path.isfile(self.cmsdir+self.basedir+fname)
+
+                #if file does not exist download new file
+                if testfile == False:
+                    try:
+                        fhandle = open(self.cmsdir+self.basedir+fname,'wb')
+                        self.s_ftp.retrbinary('RETR {0}'.format(fil),fhandle.write)
+                        fhandle.close()
+                    except:
+                        print("Unable to download STEREO observation at {0}".format(fil))
+                        continue
+
+#unzip carrington file
+    def unzip_fil(self,fname):
+        oname = fname[:-3]
 
 
+
+    #get stereo files directly from archive
     def get_stereo(self):
+
+        #connect to ftp directory
+        self.s_ftp = ftplib.FTP('stereoftp.nascom.nasa.gov','anonymous')
+
+
+        try:
+            self.grab_stereo()
+        except:
+            print('Unable to download STEREO files')
+
+        #close ftp connection
+        self.s_ftp.close()
+
+
+    
+
+    def get_stereo_vso(self):
         #Get Stereo observations
         client = vso.VSOClient()
         dt = timedelta(minutes=2)
