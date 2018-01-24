@@ -28,7 +28,6 @@ class download_cms_files:
         self.cmsdir = cmsdir
         self.x = x
         self.y = y
-        print(self.x,self.y)
 
 #start date from using sdo data
         self.sdo_start =  datetime(2010,05,01,00,00,00)
@@ -111,15 +110,16 @@ class download_cms_files:
         fmtrept = self.hinode_tldr+'re-point_{0:%Y%m%d}*.txt'.format(self.hinode_time)
         repfile = glob.glob(fmtrept)
         repoint = open(repfile[-1],'r') # read the repoint file
-#list of beginning and end time for synoptics
+        #list of beginning and end time for synoptics
         self.xrt_beg = []
         self.xrt_end = []
         ender = False #gets the end time for synoptic
         timefmt = '%Y/%m/%d %H:%M:%S' #format of time in pointing file
 
-#do not start with an end
+        #do not start with an end
         end = False
-#get the begging and end times of xrt syntopics
+        #get the begging and end times of xrt syntopics
+        #loop through repoint file lines
         for i in repoint:
             if end:
                 end = False
@@ -127,7 +127,7 @@ class download_cms_files:
                     self.xrt_end.append(datetime.strptime(i[20:39],timefmt))
                 except:
                     self.xrt_end.append(self.xrt_beg[-1]+timedelta(minutes=20)) #if syntopic is last pointing just add 20 minutes
-               
+            #look for lines containing the word synoptic 
             if 'synoptic' in i.lower():
                 end = True
                 self.xrt_beg.append(datetime.strptime(i[20:39],timefmt))
