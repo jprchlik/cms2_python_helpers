@@ -150,7 +150,7 @@ class create_cms2_files:
         # what to write out the file as
         filetime = datetime.strftime(self.dttime,'input%y%m%d%H%M%S_mod')
         #create input files
-        for i in range(1,self.nparam):
+        for i in range(self.start,self.nparam):
             files = open(self.cmsdir+self.basedir+filetime+"{0}.dat".format(str(i)),'w')
             files.write(modin.format(str(i)))
         
