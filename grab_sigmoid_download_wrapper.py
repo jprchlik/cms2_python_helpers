@@ -19,7 +19,7 @@ def main(argv):
 #Descriptive information about each keyword
     argsdes=["A string time in the format of YYYY/MM/DD HH:MM:SS",
              "The directory containing the CMS2 (default= read 'cms2_dir' file",
-             "The directory format for the sigmoid (assumes a subdirectory of cmsdir (default = YYYY/MM/DD/HHMM/"]
+             "The directory format for the sigmoid (assumes a subdirectory of cmsdir (default = YYYY/MM/DD/HHMM/)"]
 
     for i in range(len(inargs2)): helpinfo = helpinfo+' -'+snargs1[i]+' <--'+inargs2[i]+'> : '+argsdes[i]+'\n'
 
@@ -39,6 +39,7 @@ def main(argv):
     for opt, arg in opts:
         if opt == '-h':
             print helpinfo
+            sys.exit(2)
 
         elif opt in ("-t","--time"):
             time = arg
