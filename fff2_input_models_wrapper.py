@@ -33,7 +33,7 @@ def main(argv):
     try:
         opts,args = getopt.getopt(argv,inargs1,inargs2)
     except getopt.GetoptError:
-        print helpinfo
+        print(helpinfo)
         sys.exit(2)
 
 #default for cms2 directory
@@ -54,7 +54,8 @@ def main(argv):
 
     for opt, arg in opts:
         if opt == '-h':
-            print helpinfo
+            print(helpinfo)
+            sys.exit(0)
 
         elif opt in ("-t","--time"):
             time = arg
