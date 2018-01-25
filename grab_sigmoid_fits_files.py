@@ -446,11 +446,13 @@ class download_cms_files:
         #set provider which reduces to just 96m magnetograms
         prov = vso.attrs.Provider('SDAC')
         #query vso
-        qr = client.query(time,ins,prov)
+        #qr = client.query(time,ins,prov)
+        qr = client.search(time,ins,prov)
         self.qr = qr
        
 
-        res = client.get(qr,path=self.cmsdir+self.basedir+'{file}').wait()
+        #res = client.get(qr,path=self.cmsdir+self.basedir+'{file}').wait()
+        res = client.fetch(qr,path=self.cmsdir+self.basedir+'{file}').wait()
 
 #Move file to a file name with start time included
         for k in qr:
