@@ -182,7 +182,7 @@ class download_cms_files:
         #only get 3 carrington rotations
         rot_list = [brot,prot,arot]
         #only get exact carrington rotation number
-        rot_list = [prot]
+        #rot_list = [prot]
 
         #NSO synoptic maps only go until 2166
         if self.rotnum > 2166:
