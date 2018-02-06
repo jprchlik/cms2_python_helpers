@@ -72,6 +72,7 @@ class download_cms_files:
         for i in self.xrt_beg: self.xrt_hours.append('H{0:%H}00'.format(i)) 
         for i in self.xrt_end: self.xrt_hours.append('H{0:%H}00'.format(i)) 
 
+
         #get unique hours
         self.xrt_hours = unique(self.xrt_hours)
         
@@ -131,6 +132,8 @@ class download_cms_files:
             if 'synoptic' in i.lower():
                 end = True
                 self.xrt_beg.append(datetime.strptime(i[20:39],timefmt))
+                #Add continue to prevent errors when synoptic pointing is close to observed AR
+                continue
 
             #if you want to look for local AR files
             if ((self.x != None) & (self.y != None)):
