@@ -1,4 +1,4 @@
-from sunpy.net import vso
+from sunpy.net import vso, Fido
 from numpy import unique
 import glob
 from sunpy.sun import carrington_rotation_number
@@ -444,10 +444,10 @@ class download_cms_files:
         #set instrument
         ins = vso.attrs.Instrument('mdi')
         #set provider which reduces to just 96m magnetograms
-        prov = vso.attrs.Provider('SDAC')
+        #prov = vso.attrs.Provider('SDAC')
         #query vso
         #qr = client.query(time,ins,prov)
-        qr = client.search(time,ins,prov)
+        qr = client.search(time,ins)#,prov)
         self.qr = qr
        
 
@@ -523,7 +523,7 @@ class download_cms_files:
         except:
             print('Could not retrieve Carrington Rotation Mag.')
         try:
-            self.get_magnetogram()
+           self.get_magnetogram()
         except:
             print('Could not retrieve High Resoution Mag.')
 
