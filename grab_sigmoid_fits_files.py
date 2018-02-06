@@ -139,7 +139,7 @@ class download_cms_files:
             if ((self.x != None) & (self.y != None)):
                 #check for nearby pointings with small FoV J. Prchlik 2018/01/24
                 try:
-                    p_x = float(i[73:78]) 
+                    p_x = float(i[72:78]) 
                     p_y = float(i[79:87])  
                 #if values are not floats continue
                 except:
@@ -169,7 +169,7 @@ class download_cms_files:
             self.grab_car()
             self.ftp.close()
         except:
-            print 'Failed unexpectedly, closing ftp access',sys.exc_info()[0]
+            print('Failed unexpectedly, closing ftp access',sys.exc_info()[0])
             self.ftp.close()
             raise
 
@@ -537,7 +537,7 @@ class download_cms_files:
         try:
             os.makedirs(self.cmsdir+self.basedir)
         except:
-            print 'Directory {0} already exists. Proceeding'.format(self.cmsdir+self.basedir)
+            print('Directory {0} already exists. Proceeding'.format(self.cmsdir+self.basedir))
         
 
 
