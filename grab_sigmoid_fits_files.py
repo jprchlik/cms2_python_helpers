@@ -402,7 +402,7 @@ class download_cms_files:
     def get_stereo_vso(self):
         #Get Stereo observations
         client = vso.VSOClient()
-        dt = timedelta(minutes=2)
+        dt = timedelta(minutes=6)
         start = datetime.strftime(self.dttime-dt,self.sform)
         end = datetime.strftime(self.dttime+dt,self.sform)
     
@@ -415,7 +415,7 @@ class download_cms_files:
         #qr = client.query(time,ins,wave)
         qr = client.search(time,ins,wave)
         #res = client.get(qr,path=self.cmsdir+self.basedir+'{file}')
-        res = client.fetch(qr,path=self.cmsdir+self.basedir+'{file}')
+        res = client.fetch(qr,path=self.cmsdir+self.basedir+'{file}').wait()
 
         #Move file to a file name with wavelength time included
         for k in qr:
