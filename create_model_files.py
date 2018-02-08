@@ -51,7 +51,7 @@ class create_cms2_files:
         for j,i in enumerate(pathf):
             #if j == 1: i = i[:-12]+'{0}'+'\n'
             if ((j == flines-2) | (j == flines-3)):i = i[:-12]+'{1:6.5e}\n' 
-            if (j == 1): i = i[:-12]+'{0:6.5e}\n'
+            if (j == 1): i = i[:25]+'  {0:6.5e}\n'
             pathtxt = pathtxt+i
         
         #model parameters
