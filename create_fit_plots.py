@@ -1,6 +1,6 @@
 import matplotlib as mpl
 mpl.rcParams['text.usetex'] = True
-mpl.rcParams['font.size'] = 10.0
+mpl.rcParams['font.size'] = 18.0
 mpl.rcParams['font.weight'] = 'bold'
 from astropy.io import ascii
 from astropy.table import join
@@ -155,6 +155,8 @@ class cms2_plot:
         self.axm.set_ylabel('Normed Quad. Mean Dis.')
         self.axm.set_xlabel('Axial Flux [Mx]/Poloidal Flux [Mx/cm]')
         self.axm.set_yscale('log')
+        #set scale of tick labels so they fit nicely on the plot 2018/08/27 J. Prchlik 
+        self.axm.tick_params(axis='both', which='both', labelsize=10)
 
 #set up nested plot labels
 #for the value closer to the axis (axial flux)
